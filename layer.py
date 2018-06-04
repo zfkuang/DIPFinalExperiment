@@ -83,6 +83,7 @@ class AlexNet(object):
             # Check if layer should be trained from scratch
             if op_name not in self.SKIP_LAYER:
 
+                print("Loading: ", op_name)
                 with tf.variable_scope(op_name, reuse=True):
 
                     # Assign weights/biases to their corresponding tf variable
@@ -97,6 +98,8 @@ class AlexNet(object):
                         else:
                             var = tf.get_variable('weights', trainable=False)
                             session.run(var.assign(data))
+            else:
+                print("Skiped: ", op_name)
 
 
 def conv(x, filter_height, filter_width, num_filters, stride_y, stride_x, name,
@@ -136,7 +139,10 @@ def conv(x, filter_height, filter_width, num_filters, stride_y, stride_x, name,
         conv = tf.concat(axis=3, values=output_groups)
 
     # Add biases
-    bias = tf.reshape(tf.nn.bias_add(conv, biases), conv.get_shape().as_list())
+    convShape = conv.get_shape().as_list()
+    if convShape[0] == None:
+        convShape[0] = -1 
+    bias = tf.reshape(tf.nn.bias_add(conv, biases), convShape)
 
     # Apply relu function
     relu = tf.nn.relu(bias, name=scope.name)
