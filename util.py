@@ -27,7 +27,7 @@ def uploadData(sess):
 	if os.path.exists("training") != True:
 		return None, None, None, None
 
-	if os.path.exists("trainData.npy") != True or os.path.exists("testData.npy") != True: 
+	if os.path.exists("data//trainData.npy") != True or os.path.exists("data//testData.npy") != True: 
 		print("Creating new input array...")
 		inputArray = np.zeros((50, 10, 227, 227, 3), dtype=np.float32)
 		imageName = r"(?P<group>\d{3})_(?P<index>\d{4}).jpg"
@@ -49,23 +49,23 @@ def uploadData(sess):
 		trainData = inputArray[:, :7]
 		print(testData.shape, trainData.shape)
 		trainData = trainData.reshape([50*7, 227, 227, 3]) 
-		np.save("trainData.npy", trainData)
+		np.save("data//trainData.npy", trainData)
 		testData = testData.reshape([50*3, 227, 227, 3]) 
-		np.save("testData.npy", testData)
+		np.save("data//testData.npy", testData)
 	else:
 		print("Loading input array file...")
-		trainData = np.load("trainData.npy")
-		testData  = np.load("testData.npy")	
+		trainData = np.load("data//trainData.npy")
+		testData  = np.load("data//testData.npy")	
 		print(testData.shape, trainData.shape)
 
 	print("Generating label...")
-	testLabel = np.zeros((50*3, 50), dtype=np.float32)
+	testLabel = np.zeros((50*3), dtype=np.int32)
 	for group in range(0, 50):
 		for index in range(0, 3):
-			testLabel[group*3+index, group] = 1
-	trainLabel = np.zeros((50*7, 50), dtype=np.float32)
+			testLabel[group*3+index] = group
+	trainLabel = np.zeros((50*7), dtype=np.int32)
 	for group in range(0, 50):
 		for index in range(0, 7):
-			trainLabel[group*7+index, group] = 1
+			trainLabel[group*7+index] = group
 
 	return trainData, trainLabel, testData, testLabel

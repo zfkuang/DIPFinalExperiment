@@ -25,7 +25,7 @@ class AlexNet(object):
         self.SKIP_LAYER = skip_layer
 
         if weights_path == 'DEFAULT':
-            self.WEIGHTS_PATH = './bvlc_alexnet.npy'
+            self.WEIGHTS_PATH = './/data//bvlc_alexnet.npy'
         else:
             self.WEIGHTS_PATH = weights_path
 
@@ -99,7 +99,20 @@ class AlexNet(object):
                             var = tf.get_variable('weights', trainable=False)
                             session.run(var.assign(data))
             else:
-                print("Skiped: ", op_name)
+                print("Skiped: ", op_name)                
+                with tf.variable_scope(op_name, reuse=True):
+
+                    # Biases
+                    biases = tf.get_variable('biases')  
+                    print(biases)  
+                    initial = tf.constant(0.1, shape=biases.shape)
+                    session.run(biases.assign(initial))
+
+                    # Weights
+                    weight = tf.get_variable('weights')
+                    print(weight)  
+                    initial = tf.truncated_normal(weight.shape, stddev=0.1)
+                    session.run(weight.assign(initial))
 
 
 def conv(x, filter_height, filter_width, num_filters, stride_y, stride_x, name,
