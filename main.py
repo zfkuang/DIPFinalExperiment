@@ -22,6 +22,7 @@ fineTuneArgs = {
 ### Algorithm: KNeighborsClassifier
 ## usage: knn(trainData, trainLabel, testData, testLabel, **kwargs)
 import baseline.knn
+import baseline.svm
 '''
 n_neighbors: Number of neighbors to use by default for kneighbors queries.
 weights:
@@ -43,6 +44,9 @@ knnArgs = {
     'n_components': 100
 }
 
+svmArgs = {
+}
+
 if __name__=="__main__":
 
     # Initialization
@@ -61,6 +65,6 @@ if __name__=="__main__":
     # Training & Testing
 
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
-    knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
-
+    #knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
+    baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
     # pdb.set_trace()

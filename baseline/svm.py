@@ -10,6 +10,7 @@ def svm(trainData, trainLabel, testData, testLabel, **kwargs):
     #trainData = util.normalization(trainData.reshape((trainData.shape[0], trainData.shape[1] * trainData.shape[2] * trainData.shape[3])))
     #testData = util.normalization(testData.reshape((testData.shape[0], testData.shape[1] * testData.shape[2] * testData.shape[3])))
     linearSVC_clf = LinearSVC()
+    #this
     acc_list = []
     shuffleTimes = 5
     for i in range(shuffleTimes):
