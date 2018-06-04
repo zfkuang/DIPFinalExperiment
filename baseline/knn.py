@@ -21,13 +21,13 @@ TODO:
 def knn(trainData, trainLabel, testData, testLabel, **kwargs):
     print(kwargs)
     neigh = KNeighborsClassifier(n_neighbors=kwargs['n_neighbors'], weights=kwargs['weights'], p=kwargs['p'])
-    trainData = util.normalization(trainData.reshape((trainData.shape[0], trainData.shape[1] * trainData.shape[2] * trainData.shape[3])))
-    testData = util.normalization(testData.reshape((testData.shape[0], testData.shape[1] * testData.shape[2] * testData.shape[3])))
+    trainData = util.normalization(trainData)
+    testData = util.normalization(testData)
     acc_list = []
     for i in range(10):
         trainData_shuffle, trainLabel_shuffle = util.shuffle(trainData, trainLabel)
         if kwargs['PCA']:
-            pca = PCA(n_components=100)
+            pca = PCA(n_components=kwargs['n_components'])
             trainData_shuffle = pca.fit_transform(trainData_shuffle)
             neigh.fit(trainData_shuffle, trainLabel_shuffle)
             testData_PCA = pca.transform(testData)

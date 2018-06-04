@@ -31,13 +31,16 @@ weights:
     3. [callable] : a user-defined function which accepts an array of distances, and returns
      an array of the same shape containing the weights.
 p: distance L_p. L_2 is Euclidean distance.
+PCA: whether use PCA.
+n_components: if use PCA, the number of main components.
 '''
 
 knnArgs = {
-    'n_neighbors': 5,
+    'n_neighbors': 10,
     'weights': 'distance',
-    'p': 1,
-    'PCA': False
+    'p': 2.5,
+    'PCA': True,
+    'n_components': 100
 }
 
 if __name__=="__main__":
@@ -51,9 +54,9 @@ if __name__=="__main__":
 
     data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
     model = layer.AlexNet(data_, 1, 50, ['fc8'])
-    model.load_initial_weights(sess)    
+    model.load_initial_weights(sess)
     trainData = util.extractFeature(sess, model, trainData)
-    testData = util.extractFeature(sess, model, testData)    
+    testData = util.extractFeature(sess, model, testData)
 
     # Training & Testing
 
