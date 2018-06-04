@@ -69,3 +69,18 @@ def uploadData(sess):
 			trainLabel[group*7+index] = group
 
 	return trainData, trainLabel, testData, testLabel
+
+
+def shuffle(data, label):
+    size = data.shape[0]
+    shuffle_list = list(range(size))
+
+    np.random.shuffle(shuffle_list)
+    temp_data = np.copy(data)
+    temp_label = np.copy(label)
+
+    for i in range(size):
+        temp_data[i] = data[shuffle_list[i]]
+        temp_label[i] = label[shuffle_list[i]]
+
+    return temp_data, temp_label

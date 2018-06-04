@@ -9,26 +9,23 @@ import util
 import layer
 import network
 
-args = {
-	"network":"default",
-	"batch_size":10,
-	"keep_prob":0.9,
-	"learning_rate":0.01,
+### Algorithm: fine-tune pre-trained model
+## usage: fineTune(sess, trainData, trainLabel, testData, testLabel, **kwargs)
+import baseline.fineTune
+fineTuneArgs = {
+	"batch_size":5,
+	"keep_prob":0.4,
+	"learning_rate":0.001,
 	"learning_rate_decay":0.999
 }
 
 if __name__=="__main__":
-	sess = tf.Session()
 
+	# Initialization
+	sess = tf.Session()
 	trainData, trainLabel, testData, testLabel = util.uploadData(sess)
 
-	net = network.Network(sess, **args)
-
-	net.train(sess, trainData[0:50], trainLabel[0:50], args['keep_prob'])
-	net.train(sess, trainData[0:50], trainLabel[0:50], args['keep_prob'])
-	net.train(sess, trainData[0:50], trainLabel[0:50], args['keep_prob'])
-	net.train(sess, trainData[0:50], trainLabel[0:50], args['keep_prob'])
-	print(net.test(sess, trainData[0:50], trainLabel[0:50]))
-	print(net.inference(sess, trainData[0:50]))
+	# Training & Testing
+	fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
 
 	pdb.set_trace()

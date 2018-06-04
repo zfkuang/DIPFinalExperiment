@@ -103,16 +103,15 @@ class AlexNet(object):
                 with tf.variable_scope(op_name, reuse=True):
 
                     # Biases
-                    biases = tf.get_variable('biases')  
+                    biases = tf.get_variable('biases', trainable=True, initializer=tf.constant_initializer(0.1))  
                     print(biases)  
-                    initial = tf.constant(0.1, shape=biases.shape)
-                    session.run(biases.assign(initial))
+                    session.run(biases.initializer)
 
                     # Weights
-                    weight = tf.get_variable('weights')
-                    print(weight)  
-                    initial = tf.truncated_normal(weight.shape, stddev=0.1)
-                    session.run(weight.assign(initial))
+                    weights = tf.get_variable('weights', trainable=True, initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
+                    print(weights)  
+                    session.run(weights.initializer)
+
 
 
 def conv(x, filter_height, filter_width, num_filters, stride_y, stride_x, name,
