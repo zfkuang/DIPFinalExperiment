@@ -1,4 +1,5 @@
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.decomposition import PCA
 import numpy as np
 
 import util
@@ -24,9 +25,18 @@ def knn(trainData, trainLabel, testData, testLabel, **kwargs):
     testData = util.normalization(testData.reshape((testData.shape[0], testData.shape[1] * testData.shape[2] * testData.shape[3])))
     acc_list = []
     for i in range(10):
-        trainData, trainLabel = util.shuffle(trainData, trainLabel)
-        neigh.fit(trainData, trainLabel)
-        acc_list.append(neigh.score(testData, testLabel))
+        trainData_shuffle, trainLabel_shuffle = util.shuffle(trainData, trainLabel)
+        if kwargs['PCA']:
+            pca = PCA(n_components=100)
+            trainData_shuffle = pca.fit_transform(trainData_shuffle)
+            neigh.fit(trainData_shuffle, trainLabel_shuffle)
+            testData_PCA = pca.transform(testData)
+            acc_i = neigh.score(testData_PCA, testLabel)
+        else:
+            neigh.fit(trainData_shuffle, trainLabel_shuffle)
+            acc_i = neigh.score(testData, testLabel)
+        print("%d acc: " % i, acc_i)
+        acc_list.append(acc_i)
     acc = np.mean(np.array(acc_list))
     print("KNN accuracy: ", acc)
     return acc

@@ -30,12 +30,14 @@ weights:
      neighbors of a query point will have a greater influence than neighbors which are further away.
     3. [callable] : a user-defined function which accepts an array of distances, and returns
      an array of the same shape containing the weights.
+p: distance L_p. L_2 is Euclidean distance.
 '''
 
 knnArgs = {
     'n_neighbors': 5,
-    'weights': 'uniform',
-    'p': 2
+    'weights': 'distance',
+    'p': 1,
+    'PCA': False
 }
 
 if __name__=="__main__":
