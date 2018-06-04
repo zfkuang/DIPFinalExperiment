@@ -87,4 +87,10 @@ def shuffle(data, label):
     return temp_data, temp_label
 
 def normalization(data):
-    return normalize(data)
+    originShape = data.shape 
+    data = data.reshape((data.shape[0], np.multiply.reduce(data.shape[1:])))
+    data = normalize(data)
+    return data.reshape(originShape)
+
+def extractFeature(sess, model, data):
+    return sess.run([model.fc6], feed_dict={model.X:data})[0]

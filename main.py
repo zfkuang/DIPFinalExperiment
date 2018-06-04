@@ -46,6 +46,15 @@ if __name__=="__main__":
     sess = tf.Session()
     trainData, trainLabel, testData, testLabel = util.uploadData(sess)
 
+    #trainData = util.normalization(trainData)
+    #testData = util.normalization(testData)
+
+    data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
+    model = layer.AlexNet(data_, 1, 50, ['fc8'])
+    model.load_initial_weights(sess)    
+    trainData = util.extractFeature(sess, model, trainData)
+    testData = util.extractFeature(sess, model, testData)    
+
     # Training & Testing
 
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)

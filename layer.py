@@ -56,8 +56,8 @@ class AlexNet(object):
 
         # 6th Layer: Flatten -> FC (w ReLu) -> Dropout
         flattened = tf.reshape(pool5, [-1, 6*6*256])
-        fc6 = fc(flattened, 6*6*256, 4096, name='fc6')
-        dropout6 = dropout(fc6, self.KEEP_PROB)
+        self.fc6 = fc(flattened, 6*6*256, 4096, name='fc6')
+        dropout6 = dropout(self.fc6, self.KEEP_PROB)
 
         # 7th Layer: FC (w ReLu) -> Dropout
         self.fc7 = fc(dropout6, 4096, 4096, name='fc7')
