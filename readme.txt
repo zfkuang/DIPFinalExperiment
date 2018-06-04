@@ -14,8 +14,8 @@ training文件夹 --包含50个新类的训练图片，每个类别10张
 ======================
 特别说明：由于预训练的模型输入是以BGR进行存储的，故在训练时需要对输入图像做一些处理
 参考代码如下：
-		VGG_MEAN = tf.constant([123.68, 116.779, 103.939], dtype=tf.float32)
- 		# load and preprocess the image
+        VGG_MEAN = tf.constant([123.68, 116.779, 103.939], dtype=tf.float32)
+         # load and preprocess the image
         img_string = tf.read_file(filename)
         img_decoded = tf.image.decode_png(img_string, channels=3)
         img_resized = tf.image.resize_images(img_decoded, [227, 227])
