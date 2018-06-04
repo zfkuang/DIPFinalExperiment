@@ -88,3 +88,6 @@ def shuffle(data, label):
 
 def normalization(data):
     return normalize(data)
+
+def extractFeature(sess, model, data):
+	return sess.run([model.fc6], feed_dict={model.X:data})[0]

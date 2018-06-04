@@ -1,9 +1,9 @@
-import tensorflow as tf
-import numpy as np
+import tensorflow as tf 
+import numpy as np 
 import os
 import sys
-import re
-import pdb
+import re 
+import pdb 
 
 import util
 import layer
@@ -33,10 +33,10 @@ class Network(object):
         self.learning_rate_decay = self.learning_rate.assign(self.learning_rate * kwargs['learning_rate_decay'])
 
         self.global_step = tf.Variable(0, trainable=False)
-
-        #Very ugly code, we directly choose variables that should be trained,
-        #since setting them as not trainable in reuse mode has no effect at all.
-        self.params = tf.trainable_variables()[-2:]
+        
+        #Very ugly code, we directly choose variables that should be trained, 
+        #since setting them as not trainable in reuse mode has no effect at all. 
+        self.params = tf.trainable_variables()[-2:] 
         print(self.params)
 
         self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss, global_step=self.global_step, var_list=self.params)
