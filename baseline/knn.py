@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*
+
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.decomposition import PCA
 import numpy as np
