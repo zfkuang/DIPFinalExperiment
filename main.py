@@ -15,7 +15,7 @@ import baseline.fineTune
 fineTuneArgs = {
     "batch_size":5,
     "keep_prob":0.4,
-    "learning_rate":0.001,
+    "learning_rate":0.005,
     "learning_rate_decay":0.999
 }
 
@@ -51,20 +51,21 @@ if __name__=="__main__":
 
     # Initialization
     sess = tf.Session()
-    trainData, trainLabel, testData, testLabel = util.uploadData(sess)
+    inputData, inputLabel = util.uploadData(sess)
+    trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
 
     #trainData = util.normalization(trainData)
     #testData = util.normalization(testData)
 
-    data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
-    model = layer.AlexNet(data_, 1, 50, ['fc8'])
-    model.load_initial_weights(sess)
-    trainData = util.extractFeature(sess, model, trainData)
-    testData = util.extractFeature(sess, model, testData)
+    #data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
+    #model = layer.AlexNet(data_, 1, 50, ['fc8'])
+    #model.load_initial_weights(sess)
+    #trainData = util.extractFeature(sess, model, trainData)
+    #testData = util.extractFeature(sess, model, testData)
 
     # Training & Testing
 
-    # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
+    fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
     #knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
-    baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    #baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
     # pdb.set_trace()
