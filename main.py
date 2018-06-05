@@ -50,6 +50,26 @@ import baseline.linearRegression
 import baseline.logisticRegression
 svmArgs = {
 }
+
+import baseline.decisionTree
+decisionTreeArgs = {
+    'gamma': 0.1,  # 用于控制是否后剪枝的参数,越大越保守，一般0.1、0.2这样子。
+    'max_depth': 8,  # 构建树的深度，越大越容易过拟合
+    'alpha': 0,   # L1正则化系数
+    'lambda': 10,  # 控制模型复杂度的权重值的L2正则化项参数，参数越大，模型越不容易过拟合。
+    'subsample': 0.7,  # 随机采样训练样本
+    'colsample_bytree': 0.5,  # 生成树时进行的列采样
+    'min_child_weight': 3,
+    # 这个参数默认是 1，是每个叶子里面 h 的和至少是多少，对正负样本不均衡时的 0-1 分类而言
+    # ，假设 h 在 0.01 附近，min_child_weight 为 1 意味着叶子节点中最少需要包含 100 个样本。
+    # 这个参数非常影响结果，控制叶子节点中二阶导的和的最小值，该参数值越小，越容易 overfitting。
+    'silent': 1,  # 设置成1则没有运行信息输出，最好是设置为0.
+    'eta': 0.03,  # 如同学习率
+    'seed': 1000,
+    'nthread': 1,  # cpu 线程数
+    'missing': 1
+}
+
 if __name__=="__main__":
 
     # Initialization
@@ -57,8 +77,8 @@ if __name__=="__main__":
     inputData, inputLabel = util.uploadData(sess)
     trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
 
-    pdb.set_trace()
-    print(trainData.shape, trainLabel.shape, testData.shape, testLabel.shape)
+    # pdb.set_trace()
+    print trainData.shape, trainLabel.shape, testData.shape, testLabel.shape
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 
@@ -72,6 +92,10 @@ if __name__=="__main__":
 
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
     # knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
-    logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
     # baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
+
+    # logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
+    # linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
+
     # pdb.set_trace()
