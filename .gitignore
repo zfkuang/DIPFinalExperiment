@@ -108,3 +108,6 @@ venv.bak/
 
 training/*
 *.npy
+
+# Mac OS
+.DS_Store
