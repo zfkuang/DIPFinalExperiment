@@ -56,14 +56,16 @@ if __name__=="__main__":
     inputData, inputLabel = util.uploadData(sess)
     trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
 
+    pdb.set_trace()
+    print(trainData.shape, trainLabel.shape, testData.shape, testLabel.shape)
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 
-    #data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
-    #model = layer.AlexNet(data_, 1, 50, ['fc8'])
-    #model.load_initial_weights(sess)
-    #trainData = util.extractFeature(sess, model, trainData)
-    #testData = util.extractFeature(sess, model, testData)
+    data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
+    model = layer.AlexNet(data_, 1, 50, ['fc8'])
+    model.load_initial_weights(sess)
+    trainData = util.extractFeature(sess, model, trainData)
+    testData = util.extractFeature(sess, model, testData)
 
     # Training & Testing
 
