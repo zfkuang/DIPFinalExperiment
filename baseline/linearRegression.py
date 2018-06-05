@@ -1,7 +1,6 @@
 # -*- encoding: utf-8 -*
 
 from sklearn import linear_model
-from sklearn.decomposition import PCA
 import numpy as np
 
 import util
@@ -28,18 +27,6 @@ def linearReg(trainData, trainLabel, testData, testLabel, **kwargs):
         print("%d acc: " % i, acc_i)
         acc_list.append(acc_i)
 
-    # for i in range(10):
-    #     if kwargs['PCA']:
-    #         pca = PCA(n_components=kwargs['n_components'])
-    #         trainData_shuffle = pca.fit_transform(trainData_shuffle)
-    #         neigh.fit(trainData_shuffle, trainLabel_shuffle)
-    #         testData_PCA = pca.transform(testData)
-    #         acc_i = neigh.score(testData_PCA, testLabel)
-    #     else:
-    #         neigh.fit(trainData_shuffle, trainLabel_shuffle)
-    #         acc_i = neigh.score(testData, testLabel)
-    #     print("%d acc: " % i, acc_i)
-    #     acc_list.append(acc_i)
     acc = np.mean(np.array(acc_list))
     print("Linear Regression accuracy: ", acc)
     return acc
