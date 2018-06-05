@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*
+
 import tensorflow as tf
 import numpy as np
 import os
@@ -44,9 +46,9 @@ knnArgs = {
     'n_components': 100
 }
 
+import baseline.linearRegression
 svmArgs = {
 }
-
 if __name__=="__main__":
 
     # Initialization
@@ -54,8 +56,8 @@ if __name__=="__main__":
     inputData, inputLabel = util.uploadData(sess)
     trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
 
-    #trainData = util.normalization(trainData)
-    #testData = util.normalization(testData)
+    # trainData = util.normalization(trainData)
+    # testData = util.normalization(testData)
 
     #data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
     #model = layer.AlexNet(data_, 1, 50, ['fc8'])
@@ -65,7 +67,8 @@ if __name__=="__main__":
 
     # Training & Testing
 
-    fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
-    #knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
-    #baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
+    # knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
+    # linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
+    baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
     # pdb.set_trace()
