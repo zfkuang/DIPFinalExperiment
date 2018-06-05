@@ -13,18 +13,19 @@ Method:
 
 def decisionTree(trainData, trainLabel, testData, testLabel, **kwargs):
     print(kwargs)
-    cdt = DecisionTreeClassifier()
     trainData = util.normalization(trainData)
     testData = util.normalization(testData)
-    acc_list = []
 
     shuffle_times = 10
+    acc_list = []
+
     for i in range(shuffle_times):
         trainData_shuffle, trainLabel_shuffle = util.shuffle(trainData, trainLabel)
+        cdt = DecisionTreeClassifier()
         cdt.fit(trainData_shuffle, trainLabel_shuffle)
         now_acc = cdt.score(testData, testLabel)
-        print("%d acc: " % i, now_acc)
         acc_list.append(now_acc)
+        print "%d acc, %.3f" % (i, now_acc)
     acc = np.mean(np.array(acc_list))
     print("Decision Tree accuracy: ", acc)
     return acc
