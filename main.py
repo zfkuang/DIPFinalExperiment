@@ -47,6 +47,7 @@ knnArgs = {
 }
 
 import baseline.linearRegression
+import baseline.logisticRegression
 svmArgs = {
 }
 if __name__=="__main__":
@@ -68,6 +69,6 @@ if __name__=="__main__":
 
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
     # knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
-    # linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
-    baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
+    # baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
     # pdb.set_trace()
