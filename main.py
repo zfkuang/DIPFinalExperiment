@@ -17,7 +17,7 @@ import baseline.fineTune
 fineTuneArgs = {
     "batch_size":5,
     "keep_prob":0.4,
-    "learning_rate":0.001,
+    "learning_rate":0.005,
     "learning_rate_decay":0.999
 }
 
@@ -53,8 +53,11 @@ if __name__=="__main__":
 
     # Initialization
     sess = tf.Session()
-    trainData, trainLabel, testData, testLabel = util.uploadData(sess)
+    inputData, inputLabel = util.uploadData(sess)
+    trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
 
+    pdb.set_trace()
+    print(trainData.shape, trainLabel.shape, testData.shape, testLabel.shape)
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 

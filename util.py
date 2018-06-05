@@ -22,15 +22,18 @@ def imageFileToArray(session, filename):
 
 # upload both train data and test data
 # return: trainData, trainLabel, testData, testLabel
-def uploadData(sess):
+# if autodivision is true, than testData&testLabel will be None, while trainData/Label will be the whole training data 
+def uploadData(sess, autodivision=True):
+
+    inputData = None
     trainData, testData = None, None
 
     if os.path.exists("training") != True:
         return None, None, None, None
 
-    if os.path.exists("data//trainData.npy") != True or os.path.exists("data//testData.npy") != True:
+    if os.path.exists("data//inputData.npy") != True:
         print("Creating new input array...")
-        inputArray = np.zeros((50, 10, 227, 227, 3), dtype=np.float32)
+        inputData = np.zeros((50, 10, 227, 227, 3), dtype=np.float32)
         imageName = r"(?P<group>\d{3})_(?P<index>\d{4}).jpg"
         folder = "training"
         for dirPath, dirNames, fileNames in os.walk(folder):
@@ -43,48 +46,55 @@ def uploadData(sess):
                     print(temp['group'], temp['index'])
                     group = int(temp['group'])
                     index = int(temp['index'])
-                    inputArray[group-1][index-1] = imageFileToArray(sess, dirPath+"//"+fileName)
-        for i in range(50):
-            np.random.shuffle(inputArray[i])
-        testData = inputArray[:, 7:]
-        trainData = inputArray[:, :7]
-        print(testData.shape, trainData.shape)
-        trainData = trainData.reshape([50*7, 227, 227, 3])
-        np.save("data//trainData.npy", trainData)
-        testData = testData.reshape([50*3, 227, 227, 3])
-        np.save("data//testData.npy", testData)
+                    inputData[group-1][index-1] = imageFileToArray(sess, dirPath+"//"+fileName)
+        np.save("data//inputData.npy", inputData)
     else:
         print("Loading input array file...")
-        trainData = np.load("data//trainData.npy")
-        testData  = np.load("data//testData.npy")
-        print(testData.shape, trainData.shape)
+        inputData = np.load("data//inputData.npy")
+        print(inputData.shape)
 
     print("Generating label...")
-    testLabel = np.zeros((50*3), dtype=np.int32)
+    inputLabel = np.zeros((50, 10), dtype=np.int32)
     for group in range(0, 50):
-        for index in range(0, 3):
-            testLabel[group*3+index] = group
-    trainLabel = np.zeros((50*7), dtype=np.int32)
-    for group in range(0, 50):
-        for index in range(0, 7):
-            trainLabel[group*7+index] = group
+        for index in range(0, 10):
+            inputLabel[group, index] = group
+
+    return inputData, inputLabel
+
+def divideData(inputData, inputLabel, classNumber=50, trainSample=7, testSample=3):
+
+    shuffle_list = list(range(50))
+    np.random.shuffle(shuffle_list)
+
+    print(inputData.shape, shuffle_list)
+    inputData = inputData[shuffle_list]
+    inputLabel = inputLabel[shuffle_list]
+#    inputData = np.sort(inputData, axis=0, order=shuffle_list)
+#    inputLabel = np.sort(inputLabel, axis=0, order=shuffle_list)
+    trainData = inputData[:classNumber, :trainSample]
+    testData = inputData[:classNumber, trainSample:trainSample+testSample]
+    trainLabel = inputLabel[:classNumber, :trainSample]
+    testLabel = inputLabel[:classNumber, trainSample:trainSample+testSample]
+    print(testData.shape, trainData.shape)
+    print(testLabel.shape, trainLabel.shape)
+    trainData = trainData.reshape([classNumber*trainSample, 227, 227, 3])
+    testData = testData.reshape([classNumber*testSample, 227, 227, 3])
+    trainLabel = trainLabel.reshape([classNumber*trainSample])
+    testLabel = testLabel.reshape([classNumber*testSample])
 
     return trainData, trainLabel, testData, testLabel
-
 
 def shuffle(data, label):
     size = data.shape[0]
     shuffle_list = list(range(size))
 
     np.random.shuffle(shuffle_list)
+    data = data[shuffle_list]
+    label = label[shuffle_list]
     temp_data = np.copy(data)
     temp_label = np.copy(label)
 
-    for i in range(size):
-        temp_data[i] = data[shuffle_list[i]]
-        temp_label[i] = label[shuffle_list[i]]
-
-    return temp_data, temp_label
+    return data, label
 
 def normalization(data):
     originShape = data.shape 
