@@ -24,7 +24,6 @@ fineTuneArgs = {
 ### Algorithm: KNeighborsClassifier
 ## usage: knn(trainData, trainLabel, testData, testLabel, **kwargs)
 import baseline.knn
-import baseline.svm
 '''
 n_neighbors: Number of neighbors to use by default for kneighbors queries.
 weights:
@@ -46,8 +45,39 @@ knnArgs = {
     'n_components': 100
 }
 
+import baseline.bayes
+'''
+PCA: whether use PCA.
+n_components: if use PCA, the number of main components.
+'''
+bayesArgs = {
+    'PCA': True,
+    'n_components': 100
+}
+
 import baseline.linearRegression
+import baseline.logisticRegression
+import baseline.svm
 svmArgs = {
+}
+
+import baseline.decisionTree
+decisionTreeArgs = {
+    'gamma': 0.1,  # 用于控制是否后剪枝的参数,越大越保守，一般0.1、0.2这样子。
+    'max_depth': 8,  # 构建树的深度，越大越容易过拟合
+    'alpha': 0,   # L1正则化系数
+    'lambda': 10,  # 控制模型复杂度的权重值的L2正则化项参数，参数越大，模型越不容易过拟合。
+    'subsample': 0.7,  # 随机采样训练样本
+    'colsample_bytree': 0.5,  # 生成树时进行的列采样
+    'min_child_weight': 3,
+    # 这个参数默认是 1，是每个叶子里面 h 的和至少是多少，对正负样本不均衡时的 0-1 分类而言
+    # ，假设 h 在 0.01 附近，min_child_weight 为 1 意味着叶子节点中最少需要包含 100 个样本。
+    # 这个参数非常影响结果，控制叶子节点中二阶导的和的最小值，该参数值越小，越容易 overfitting。
+    'silent': 1,  # 设置成1则没有运行信息输出，最好是设置为0.
+    'eta': 0.03,  # 如同学习率
+    'seed': 1000,
+    'nthread': 1,  # cpu 线程数
+    'missing': 1
 }
 
 import models.prototypicalNetwork
@@ -60,15 +90,17 @@ if __name__=="__main__":
     # Initialization
     sess = tf.Session()
     inputData, inputLabel = util.uploadData(sess)
+    #inputData = util.normalization(inputData)
     trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
-
+    inputData, inputLabel, inputIndex = util.uploadBasicData()
     # pdb.set_trace()
-    # print(trainData.shape, trainLabel.shape, testData.shape, testLabel.shape)
+    print("trainDataset shape:", trainData.shape, trainLabel.shape)
+    print("TestDataset shape:", testData.shape, testLabel.shape)
+    print("SourceDataset shape:", inputData.shape, inputLabel.shape, inputIndex[10])
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 
     #methods where feature extraction is not required.
-    models.prototypicalNetwork.prototypicalNetwork(sess, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
 
     # Feature extraction
@@ -80,7 +112,14 @@ if __name__=="__main__":
 
     #methods that need feature extraction.
     # knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
-    # linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
+    # bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
     # baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    # decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
+    # logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
+    # linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
 
+    testData = np.concatenate((trainData, testData))
+    testLabel = np.concatenate((trainLabel, testLabel)) 
+    models.prototypicalNetwork.prototypicalNetwork(sess, inputData, inputLabel, inputIndex, testData, testLabel, **prototypicalNetworkArgs)
+    
     # pdb.set_trace()

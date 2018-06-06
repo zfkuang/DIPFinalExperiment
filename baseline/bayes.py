@@ -1,6 +1,4 @@
-# -*- encoding: utf-8 -*
-
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
 from sklearn.decomposition import PCA
 import numpy as np
 
@@ -15,30 +13,28 @@ Method:
 
 '''
 TODO:
-1. n_neighbors can be learnt by word-vector.
-2. weights can use 'uniform', 'distance' or other [callable] function to compute weights.
-3. p can use 1 or 2 or any for minkowski distance.
+1. feature的先验概率分布？
 '''
 
-def knn(trainData, trainLabel, testData, testLabel, **kwargs):
+def bayes(trainData, trainLabel, testData, testLabel, **kwargs):
     print(kwargs)
     trainData = util.normalization(trainData)
     testData = util.normalization(testData)
     acc_list = []
     for i in range(10):
         trainData_shuffle, trainLabel_shuffle = util.shuffle(trainData, trainLabel)
-        neigh = KNeighborsClassifier(n_neighbors=kwargs['n_neighbors'], weights=kwargs['weights'], p=kwargs['p'])
+        clf = GaussianNB()
         if kwargs['PCA']:
             pca = PCA(n_components=kwargs['n_components'])
             trainData_shuffle = pca.fit_transform(trainData_shuffle)
-            neigh.fit(trainData_shuffle, trainLabel_shuffle)
+            clf.fit(trainData_shuffle, trainLabel_shuffle)
             testData_PCA = pca.transform(testData)
-            acc_i = neigh.score(testData_PCA, testLabel)
+            acc_i = clf.score(testData_PCA, testLabel)
         else:
-            neigh.fit(trainData_shuffle, trainLabel_shuffle)
-            acc_i = neigh.score(testData, testLabel)
+            clf.fit(trainData_shuffle, trainLabel_shuffle)
+            acc_i = clf.score(testData, testLabel)
         print("%d acc: " % i, acc_i)
         acc_list.append(acc_i)
     acc = np.mean(np.array(acc_list))
-    print("KNN accuracy: ", acc)
+    print("Naive Bayes accuracy: ", acc)
     return acc

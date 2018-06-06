@@ -1,6 +1,8 @@
-###运行环境
+### 运行环境
 
-​    Python3，tensorflow
+​    Python3，tensorflow, sklearn, metric-learn
+
+    pip安装即可
 
 
 
