@@ -24,7 +24,6 @@ fineTuneArgs = {
 ### Algorithm: KNeighborsClassifier
 ## usage: knn(trainData, trainLabel, testData, testLabel, **kwargs)
 import baseline.knn
-import baseline.svm
 '''
 n_neighbors: Number of neighbors to use by default for kneighbors queries.
 weights:
@@ -46,8 +45,19 @@ knnArgs = {
     'n_components': 100
 }
 
+import baseline.bayes
+'''
+PCA: whether use PCA.
+n_components: if use PCA, the number of main components.
+'''
+bayesArgs = {
+    'PCA': True,
+    'n_components': 100
+}
+
 import baseline.linearRegression
 import baseline.logisticRegression
+import baseline.svm
 svmArgs = {
 }
 
@@ -78,7 +88,7 @@ if __name__=="__main__":
     trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
 
     # pdb.set_trace()
-    print trainData.shape, trainLabel.shape, testData.shape, testLabel.shape
+    print(trainData.shape, trainLabel.shape, testData.shape, testLabel.shape)
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 
@@ -92,10 +102,11 @@ if __name__=="__main__":
 
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
     # knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
+    # bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
     # baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
     decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
-
     # logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
     # linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
+
 
     # pdb.set_trace()

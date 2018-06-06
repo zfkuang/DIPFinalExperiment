@@ -25,7 +25,7 @@ def decisionTree(trainData, trainLabel, testData, testLabel, **kwargs):
         cdt.fit(trainData_shuffle, trainLabel_shuffle)
         now_acc = cdt.score(testData, testLabel)
         acc_list.append(now_acc)
-        print "%d acc, %.3f" % (i, now_acc)
+        print("%d acc, %.3f" % (i, now_acc))
     acc = np.mean(np.array(acc_list))
     print("Decision Tree accuracy: ", acc)
     return acc
