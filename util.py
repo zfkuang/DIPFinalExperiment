@@ -23,19 +23,19 @@ def imageFileToArray(session, filename):
 # upload both train data and test data
 # return: trainData, trainLabel, testData, testLabel
 # if autodivision is true, than testData&testLabel will be None, while trainData/Label will be the whole training data 
-def uploadData(sess, autodivision=True):
+def uploadData(sess):
 
     inputData = None
     trainData, testData = None, None
 
-    if os.path.exists("training") != True:
-        return None, None, None, None
+    if os.path.exists("data//training") != True:
+        return None, None
 
     if os.path.exists("data//inputData.npy") != True:
         print("Creating new input array...")
         inputData = np.zeros((50, 10, 227, 227, 3), dtype=np.float32)
         imageName = r"(?P<group>\d{3})_(?P<index>\d{4}).jpg"
-        folder = "training"
+        folder = "data//training"
         for dirPath, dirNames, fileNames in os.walk(folder):
             #print(dirPath, dirNames, fileNames)
             for fileName in fileNames:
@@ -63,12 +63,14 @@ def uploadData(sess, autodivision=True):
 
 def divideData(inputData, inputLabel, classNumber=50, trainSample=7, testSample=3):
 
-    shuffle_list = list(range(50))
-    np.random.shuffle(shuffle_list)
+    shuffle0 = list(range(50))
+    shuffle1 = list(range(10))
+    np.random.shuffle(shuffle0)
+    np.random.shuffle(shuffle1)
 
-    print(inputData.shape, shuffle_list)
-    inputData = inputData[shuffle_list]
-    inputLabel = inputLabel[shuffle_list]
+    inputData = inputData[shuffle0]
+    inputLabel = inputLabel[shuffle0]
+    inputData = inputData[:,shuffle1]
 #    inputData = np.sort(inputData, axis=0, order=shuffle_list)
 #    inputLabel = np.sort(inputLabel, axis=0, order=shuffle_list)
     trainData = inputData[:classNumber, :trainSample]
@@ -91,8 +93,6 @@ def shuffle(data, label):
     np.random.shuffle(shuffle_list)
     data = data[shuffle_list]
     label = label[shuffle_list]
-    temp_data = np.copy(data)
-    temp_label = np.copy(label)
 
     return data, label
 
@@ -103,4 +103,4 @@ def normalization(data):
     return data.reshape(originShape)
 
 def extractFeature(sess, model, data):
-    return sess.run([model.fc6], feed_dict={model.X:data})[0]
+    return sess.run([model.fc7], feed_dict={model.X:data})[0]

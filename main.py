@@ -49,6 +49,12 @@ knnArgs = {
 import baseline.linearRegression
 svmArgs = {
 }
+
+import models.prototypicalNetwork
+prototypicalNetworkArgs = {
+}
+
+
 if __name__=="__main__":
 
     # Initialization
@@ -56,21 +62,25 @@ if __name__=="__main__":
     inputData, inputLabel = util.uploadData(sess)
     trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
 
-    pdb.set_trace()
-    print(trainData.shape, trainLabel.shape, testData.shape, testLabel.shape)
+    # pdb.set_trace()
+    # print(trainData.shape, trainLabel.shape, testData.shape, testLabel.shape)
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 
+    #methods where feature extraction is not required.
+    models.prototypicalNetwork.prototypicalNetwork(sess, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
+    # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
+
+    # Feature extraction
     data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
     model = layer.AlexNet(data_, 1, 50, ['fc8'])
     model.load_initial_weights(sess)
     trainData = util.extractFeature(sess, model, trainData)
     testData = util.extractFeature(sess, model, testData)
 
-    # Training & Testing
-
-    # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
+    #methods that need feature extraction.
     # knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
     # linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
-    baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    # baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+
     # pdb.set_trace()

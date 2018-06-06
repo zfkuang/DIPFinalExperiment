@@ -16,7 +16,7 @@ class Network(object):
         self.keep_prob_ = tf.placeholder(tf.float32)
 
         if kwargs['model'] == 'default':
-            self.net = layer.AlexNet(self.data_, self.keep_prob_, 50, ['fc7', 'fc8'])
+            self.net = layer.AlexNet(self.data_, self.keep_prob_, 50, ['fc8'])
             self.logits = self.net.fc8
         else:
             return None
