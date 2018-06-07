@@ -80,33 +80,46 @@ decisionTreeArgs = {
     'missing': 1
 }
 
+import models.prototypicalNetwork
+prototypicalNetworkArgs = {
+}
+
+
 if __name__=="__main__":
 
     # Initialization
     sess = tf.Session()
     inputData, inputLabel = util.uploadData(sess)
+    #inputData = util.normalization(inputData)
     trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
-
+    inputData, inputLabel, inputIndex = util.uploadBasicData()
     # pdb.set_trace()
-    print(trainData.shape, trainLabel.shape, testData.shape, testLabel.shape)
+    print("trainDataset shape:", trainData.shape, trainLabel.shape)
+    print("TestDataset shape:", testData.shape, testLabel.shape)
+    print("SourceDataset shape:", inputData.shape, inputLabel.shape, inputIndex[10])
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 
+    #methods where feature extraction is not required.
+    # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
+
+    # Feature extraction
     data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
     model = layer.AlexNet(data_, 1, 50, ['fc8'])
     model.load_initial_weights(sess)
     trainData = util.extractFeature(sess, model, trainData)
     testData = util.extractFeature(sess, model, testData)
 
-    # Training & Testing
-
-    # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
+    #methods that need feature extraction.
     # knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
     # bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
     # baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
-    decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
+    # decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
     # logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
     # linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
 
-
+    testData = np.concatenate((trainData, testData))
+    testLabel = np.concatenate((trainLabel, testLabel)) 
+    models.prototypicalNetwork.prototypicalNetwork(sess, inputData, inputLabel, inputIndex, testData, testLabel, **prototypicalNetworkArgs)
+    
     # pdb.set_trace()
