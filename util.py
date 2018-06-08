@@ -6,19 +6,19 @@ import sys
 import re
 from sklearn.preprocessing import normalize
 
-VGG_MEAN = tf.constant([123.68, 116.779, 103.939], dtype=tf.float32)
 
 def imageFileToArray(session, filename):
         # load and preprocess the image
-    img_string = tf.read_file(filename)
-    img_decoded = tf.image.decode_jpeg(img_string, channels=3)
-    img_resized = tf.image.resize_images(img_decoded, [227, 227])
-    img_centered = tf.subtract(img_resized, VGG_MEAN)
+    with tf.variable_scope("image", reuse=True):
+        VGG_MEAN = tf.constant([123.68, 116.779, 103.939], dtype=tf.float32)
+        img_string = tf.read_file(filename)
+        img_decoded = tf.image.decode_jpeg(img_string, channels=3)
+        img_resized = tf.image.resize_images(img_decoded, [227, 227])
+        img_centered = tf.subtract(img_resized, VGG_MEAN)
 
-    # pdb.set_trace()
-    # RGB -> BGR
-    img_bgr = img_centered[:, :, ::-1]
-    return session.run(img_bgr)
+        # RGB -> BGR
+        img_bgr = img_centered[:, :, ::-1] 
+        return session.run(img_bgr)
 
 def uploadData(sess):
 
@@ -95,8 +95,8 @@ def divideData(inputData, inputLabel, classNumber=50, trainSample=7, testSample=
 
     shuffle0 = list(range(50))
     shuffle1 = list(range(10))
-    np.random.shuffle(shuffle0)
-    np.random.shuffle(shuffle1)
+    #np.random.shuffle(shuffle0)
+    #np.random.shuffle(shuffle1)
 
     inputData = inputData[shuffle0]
     inputLabel = inputLabel[shuffle0]
