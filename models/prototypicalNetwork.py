@@ -17,9 +17,11 @@ def conv_block(inputs, out_channels, name='conv'):
 
 def encoder(x, output_dim, keep_prob, reuse=False):
     with tf.variable_scope('encoder', reuse=reuse):
-        net = tf.layers.dense(x, 4096, activation=tf.nn.relu, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
+        net = tf.layers.dense(x, 1024, activation=tf.nn.relu, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
+        net = tf.contrib.layers.batch_norm(net, updates_collections=None, decay=0.99, scale=True, center=True)
         net = tf.nn.dropout(net, keep_prob)
-        net = tf.layers.dense(net, output_dim, activation=tf.nn.relu, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
+        net = tf.layers.dense(net, 500, activation=tf.nn.relu, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
+        net = tf.contrib.layers.batch_norm(net, updates_collections=None, decay=0.99, scale=True, center=True)
         net = tf.nn.dropout(net, keep_prob)
         net = tf.layers.dense(net, output_dim, activation=tf.nn.relu, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
         #net = tf.layer.AlexNet(x, 0.5, 2000, ["fc8"])
@@ -41,14 +43,14 @@ def euclidean_distance(a, b):
 
 n_epochs = 100
 n_episodes = 100
-n_way = 50
+n_way = 100
 n_shot = 5
-n_query = 15
+n_query = 25
 im_width, im_height, channels = 227, 227, 3
 n_features = 4096
 h_dim = 32
 z_dim = 32
-output_dim = 2048
+output_dim = 500
 n_test_episodes = 100
 n_test_way = 50
 n_test_example = 10
@@ -65,8 +67,9 @@ def prototypicalNetwork(sess, trainData, trainLabel, trainIndex, testData, testL
 
     testData = testData.reshape([novelClassNumber, testData.shape[0]//novelClassNumber]+list(testData.shape[1:]))
     testLabel = testLabel.reshape([novelClassNumber, testLabel.shape[0]//novelClassNumber]+list(testLabel.shape[1:]))
-    n_classes = sourceClassNumber
-    n_test_classes = novelClassNumber
+    n_classes = 1000
+    n_test_classes = 50
+    n_train_classes = 700
     print(testData.shape, testLabel.shape, trainData.shape)
 
     x = tf.placeholder(tf.float32, [None, None, n_features]) # num_classes, num_support, feature
@@ -96,13 +99,14 @@ def prototypicalNetwork(sess, trainData, trainLabel, trainIndex, testData, testL
     #with tf.variable_scope('encoder', reuse=True):
     #    alexNet.load_initial_weights(sess)
 
-
+    CI = np.random.permutation(n_classes)
     for ep in range(n_epochs):
         for epi in range(n_episodes):
-            epi_classes = np.random.permutation(n_classes)[:n_way]
+            epi_classes = np.random.permutation(n_train_classes)[:n_way]
             support = np.zeros([n_way, n_shot, n_features], dtype=np.float32)
             query = np.zeros([n_way, n_query, n_features], dtype=np.float32)
-            for i, epi_cls in enumerate(epi_classes):
+            for i, epi_clss in enumerate(epi_classes):
+                epi_cls = CI[epi_clss]
                 selected = np.random.permutation(trainIndex[epi_cls].shape[0])[:n_shot + n_query]
                 support[i] = trainData[trainIndex[epi_cls][selected[:n_shot]]]
                 query[i] = trainData[trainIndex[epi_cls][selected[n_shot:n_shot+n_query]]]
@@ -110,14 +114,34 @@ def prototypicalNetwork(sess, trainData, trainLabel, trainIndex, testData, testL
             # labels in training doesn't matter at all
             labels = np.tile(np.arange(n_way)[:, np.newaxis], (1, n_query)).astype(np.uint8)
             labels = labels.reshape([n_way*n_query])
-            _, ls, ac, logy = sess.run([train_op, ce_loss, acc, log_p_y], feed_dict={x: support, q: query, y:labels, keep_prob: 0.7})
+            _, ls, ac, logy = sess.run([train_op, ce_loss, acc, log_p_y], feed_dict={x: support, q: query, y:labels, keep_prob: 0.4})
             if (epi+1) % 50 == 0:
-                print(logy[:5])
+                #print(logy[:5])
                 print('[epoch {}/{}, episode {}/{}] => loss: {:.5f}, acc: {:.5f}'.format(ep+1, n_epochs, epi+1, n_episodes, ls, ac))
 
         print('Testing...')
         acc_ = []
-        loss_ = []
+        loss_ = []        
+        # for epi in range(n_test_episodes):
+        #     epi_classes = np.random.permutation(n_test_classes)[:n_test_way]
+        #     support = np.zeros([n_test_way, n_test_shot, n_features], dtype=np.float32)
+        #     query = np.zeros([n_test_way, n_test_query, n_features], dtype=np.float32)
+        #     for i, epi_clss in enumerate(epi_classes):
+        #         epi_cls = CI[epi_clss+n_train_classes]
+        #         selected = np.random.permutation(n_test_example)
+        #         #support_selected = np.random.permutation()
+        #         support[i] = trainData[trainIndex[epi_cls][selected[:n_test_shot]]]
+        #         #query_selected = np.random.permutation(n_test_query)
+        #         query[i] = trainData[trainIndex[epi_cls][selected[n_test_shot:n_test_shot+n_test_query]]]
+        #     query = query.reshape([n_test_way*n_test_query, n_features])
+        #     labels = np.tile(np.arange(n_test_way)[:, np.newaxis], (1, n_test_query)).astype(np.uint8)
+        #     labels = labels.reshape([n_test_way*n_test_query])
+        #     ac, ls, logit, logy = sess.run([acc, ce_loss, logits, log_p_y], feed_dict={x: support, q: query, y:labels, keep_prob: 1.0})
+        #     if epi == 0:
+        #         print(logy[:5])
+        #         print(logit[:5])
+        #     acc_.append(ac)
+        #     loss_.append(ls)
         for epi in range(n_test_episodes):
             epi_classes = np.random.permutation(n_test_classes)[:n_test_way]
             support = np.zeros([n_test_way, n_test_shot, n_features], dtype=np.float32)
@@ -133,8 +157,9 @@ def prototypicalNetwork(sess, trainData, trainLabel, trainIndex, testData, testL
             labels = labels.reshape([n_test_way*n_test_query])
             ac, ls, logit, logy = sess.run([acc, ce_loss, logits, log_p_y], feed_dict={x: support, q: query, y:labels, keep_prob: 1.0})
             if epi == 0:
-                print(logy[:5])
-                print(logit[:5])
+                pass
+                #print(logy[:5])
+                #print(logit[:5])
             acc_.append(ac)
             loss_.append(ls)
         print('Average Test Accuracy: {:.5f}, Loss: {:.5f}'.format(np.mean(acc_), np.mean(loss_)))    
