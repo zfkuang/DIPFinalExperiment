@@ -17,7 +17,7 @@ def imageFileToArray(session, filename):
         img_centered = tf.subtract(img_resized, VGG_MEAN)
 
         # RGB -> BGR
-        img_bgr = img_centered[:, :, ::-1] 
+        img_bgr = img_centered[:, :, ::-1]
         return session.run(img_bgr)
 
 def uploadData(sess):
@@ -86,8 +86,8 @@ def uploadBasicData():
         index[inputLabel[i]].append(i)
     for i in range(1000):
         index[i] = np.array(index[i])
-        
-    inputData = np.load("data//fc7.npy")        
+
+    inputData = np.load("data//fc7.npy")
 
     return inputData, inputLabel, index
 
@@ -127,10 +127,22 @@ def shuffle(data, label):
     return data, label
 
 def normalization(data):
-    originShape = data.shape 
+    originShape = data.shape
     data = data.reshape((data.shape[0], np.multiply.reduce(data.shape[1:])))
     data = normalize(data)
     return data.reshape(originShape)
 
 def extractFeature(sess, model, data):
     return sess.run([model.fc7], feed_dict={model.X:data})[0]
+
+def loadBassClassifier():
+    param_dicts = np.load("data/bass_classifier.npy")
+    classifier = []
+    for name, param_dict in param_dicts.items():
+        kernel = param_dict['kernel']
+        print(kernel.shape)
+        bias = param_dict['bias']
+        data = np.concatenate((kernel, bias), axis=1)
+        print(data.shape)
+        classifier.append(data)
+    return classifier
