@@ -139,10 +139,5 @@ if __name__=="__main__":
     # models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, inputData, inputLabel, **prototypicalNetworkArgs)
     # models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
 
-    pos_data = basicData[basicIndex[0]]
-    pos_label = [1] * len(basicIndex[0])
-    neg_data = basicData[basicIndex[1]]
-    neg_label = [0] * len(basicIndex[1])
-    data = np.concatenate((pos_data, neg_data))
-    label = np.concatenate((pos_label, neg_label))
-    models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)
+
+    models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)
