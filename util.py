@@ -135,14 +135,15 @@ def normalization(data):
 def extractFeature(sess, model, data):
     return sess.run([model.fc7], feed_dict={model.X:data})[0]
 
-def loadBassClassifier():
-    param_dicts = np.load("data/bass_classifier.npy")
+def loadBaseClassifier():
+    param_dicts = np.load("data/base_classifier.npy").item()
     classifier = []
     for name, param_dict in param_dicts.items():
+        param_dict = param_dict.item()
         kernel = param_dict['kernel']
-        print(kernel.shape)
         bias = param_dict['bias']
-        data = np.concatenate((kernel, bias), axis=1)
-        print(data.shape)
+        bias = bias.reshape((1, -1))
+        data = np.concatenate((kernel, bias))
+        data = np.reshape(data, (np.multiply.reduce(data.shape)))
         classifier.append(data)
-    return classifier
+    return np.array(classifier)
