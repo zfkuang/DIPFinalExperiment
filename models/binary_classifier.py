@@ -32,7 +32,10 @@ class binary_classifier(object):
         else:
             return None
 
-        self.loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.label_, logits=self.logits))
+        with tf.variable_scope('encoder', reuse=True):
+            self.loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.label_, logits=self.logits)) \
+                + 0.01 * tf.nn.l2_loss(tf.get_variable('dense/bias')) \
+                + 0.01 * tf.nn.l2_loss(tf.get_variable('dense/kernel'))
         self.correct_pred = tf.equal(tf.cast(tf.argmax(self.logits, 1), tf.int32), self.label_)
         self.pred = tf.argmax(self.logits, 1)
         self.pred_prob = tf.nn.softmax(self.logits, axis=1)[:,1]
