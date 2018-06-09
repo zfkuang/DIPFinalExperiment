@@ -78,10 +78,29 @@ class binary_classifier(object):
     def inference(self, sess, data):
         return sess.run([self.pred], feed_dict={self.data_:data, self.keep_prob_:1.0})
 
-    def save_model(self, **kwargs):
-        # checkpoint_path='model.ckpt-5000'#your ckpt path
-        # reader=pywrap_tensorflow.NewCheckpointReader(checkpoint_path)
-        # var_to_shape_map=reader.get_variable_to_shape_map()
+    def save_model(self, sess, **kwargs):
+        saver = tf.train.Saver()
+        if not os.path.exists("data/save_model"):
+            os.mkdir("data/save_model")
+        modelPath = "data/save_model/base_class_%d/" % kwargs['trainNum']
+        if not os.path.exists(modelPath):
+            os.mkdir(modelPath)
+        checkpoint_path = modelPath + "save.ckpt"
+        saver.save(sess, checkpoint_path)
+        reader=pywrap_tensorflow.NewCheckpointReader(checkpoint_path)
+        var_to_shape_map=reader.get_variable_to_shape_map()
+
+        for key in var_to_shape_map:
+            str_name = key
+            if str_name.find('Adam') > -1:
+                continue
+            print('tensor_name:' , str_name)
+            if (str_name == 'encoder/dense/kernel'):
+                kernel = reader.get_tensor(key)
+            if (str_name == 'encoder/dense/bias'):
+                bias = reader.get_tensor(key)
+        network = {"kernel":kernel, "bias":bias}
+        np.save(modelPath + "save.npy", network)
 
 
 def classify(sess, trainData, trainLabel, testData, testLabel, **kwargs):
@@ -91,6 +110,7 @@ def classify(sess, trainData, trainLabel, testData, testLabel, **kwargs):
     print(kwargs['trainNum'], "train", net.train_epoch(sess, trainData, trainLabel, **kwargs))
     # print(kwargs['trainNum'], "test", net.test(sess, testData, testLabel))
     # print(net.inference(sess, testData))
+    net.save_model(sess, **kwargs)
 
 
 def train_base_classifier(sess, trainData, trainLabel, trainIndex, **kwargs):

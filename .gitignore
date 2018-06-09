@@ -109,6 +109,7 @@ venv.bak/
 training/*
 data/training/*
 data/testing/*
+data/save_model
 *.npy
 
 # Mac OS
