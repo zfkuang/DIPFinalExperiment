@@ -34,11 +34,12 @@ class binary_classifier(object):
 
         with tf.variable_scope('encoder', reuse=True):
             self.loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.label_, logits=self.logits)) \
-                + 0.01 * tf.nn.l2_loss(tf.get_variable('dense/bias')) \
-                + 0.01 * tf.nn.l2_loss(tf.get_variable('dense/kernel'))
+                + kwargs['lambda_l2'] * tf.nn.l2_loss(tf.get_variable('dense/bias')) \
+                + kwargs['lambda_l2'] * tf.nn.l2_loss(tf.get_variable('dense/kernel'))
         self.correct_pred = tf.equal(tf.cast(tf.argmax(self.logits, 1), tf.int32), self.label_)
         self.pred = tf.argmax(self.logits, 1)
-        self.pred_prob = tf.nn.softmax(self.logits, axis=1)[:,1]
+        # self.pred_prob = tf.nn.softmax(self.logits, axis=1)[:,1]
+        self.pred_prob = self.logits[:,1] - self.logits[:,0]
 
         self.acc = tf.reduce_mean(tf.cast(self.correct_pred, tf.float32))
 
@@ -136,18 +137,20 @@ class binary_classifier(object):
         np.save(modelPath + "save.npy", network)
 
 
-def classify(sess, pos_data, neg_data, pos_label, neg_label, testData, testLabel, **kwargs):
+def classify(sess, pos_data, neg_data, pos_label, neg_label, pos_data_test, neg_data_test, pos_label_test, neg_label_test, **kwargs):
     net = binary_classifier(sess, **kwargs)
 
     for i in range(kwargs['epoch']):
         train_neg_data, train_neg_label = util.shuffle(neg_data, neg_label)
-        trainData = np.concatenate((pos_data, train_neg_data[:10]))
-        trainLabel = np.concatenate((pos_label, train_neg_label[:10]))
+        trainData = np.concatenate((pos_data, train_neg_data))
+        trainLabel = np.concatenate((pos_label, train_neg_label))
         trainData, trainLabel = util.shuffle(trainData, trainLabel)
+        net.train_epoch(sess, trainData, trainLabel, **kwargs)
         # print(kwargs['trainNum'], "train", net.train_epoch(sess, trainData, trainLabel, **kwargs))
         # print(kwargs['trainNum'], "test", net.test(sess, testData, testLabel))
         # print(net.inference(sess, testData))
-    print(kwargs['trainNum'], "test", net.test(sess, testData, testLabel))
+    print(kwargs['trainNum'], "test_pos", net.test(sess, pos_data_test, pos_label_test))
+    print(kwargs['trainNum'], "test_neg", net.test(sess, neg_data_test, neg_label_test))
     net.save_model(sess, **kwargs)
 
 
@@ -189,16 +192,27 @@ def train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **k
                 indexlist.append(j)
         pos_data_test = testData[indexlist]
         pos_label_test = [1] * len(indexlist)
-        # templist = list(np.arange(0, len(testData)))
-        # for l in indexlist:
-        #     templist.remove(l)
-        # neg_data = testData[templist]
-        # neg_label = [0] * len(templist)
+        templist = list(np.arange(0, len(testData)))
+        for l in indexlist:
+            templist.remove(l)
+        neg_data_test = testData[templist]
+        neg_label_test = [0] * len(templist)
         # data_test = np.concatenate((pos_data, neg_data))
         # label_test = np.concatenate((pos_label, neg_label))
 
-        classify(sess, np.array(pos_data), np.array(neg_data), np.array(pos_label), np.array(neg_label), np.array(pos_data_test), np.array(pos_label_test), trainNum=i, test=False, **kwargs)
+        classify(sess, np.array(pos_data), np.array(neg_data), np.array(pos_label), np.array(neg_label),
+          np.array(pos_data_test), np.array(neg_data_test), np.array(pos_label_test), np.array(neg_label_test), trainNum=i, test=False, **kwargs)
         tf.get_variable_scope().reuse_variables()
+
+    files = os.listdir('data/save_model')
+    alist = list(range(0,50))
+    res = {}
+    for filename in files:
+        alist.remove(int(filename.split('_')[-1]))
+        a = np.load('data/save_model/'+filename+'/save.npy')
+        res[filename] = a
+    print(alist)
+    np.save('data/novel_classifier.npy', res)
 
 def test_base_classifier(sess, testData, testLabel, **kwargs):
     classifiers = util.loadBaseClassifier()
@@ -213,6 +227,26 @@ def test_base_classifier(sess, testData, testLabel, **kwargs):
             print(j, pred_prob)
         label = np.argmax(np.array(prob_list), axis=1)
         print(label)
+        if label == testLabel[i]:
+            acc += 1
+    print("acc: ", acc / len(testData))
+
+
+def test_novel_classifier(sess, testData, testLabel, **kwargs):
+    classifiers = util.loadNovelClassifier()
+    acc = 0
+    for i, data in enumerate(testData):
+        prob_list = []
+        for j, weight in enumerate(classifiers):
+            # if j != testLabel[i]:
+                # continue
+            net = binary_classifier(sess, test=True, weight=weight, **kwargs)
+            pred_prob = net.inference(sess, data.reshape(1, -1))
+            prob_list.append(pred_prob)
+            tf.get_variable_scope().reuse_variables()
+            # print("%d classifier get %d" % (i, j), pred_prob)
+        label = np.argmax(np.array(prob_list))
+        print(i, label == testLabel[i])
         if label == testLabel[i]:
             acc += 1
     print("acc: ", acc / len(testData))

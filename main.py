@@ -18,7 +18,8 @@ binaryClassifierArgs = {
     "learning_rate":0.005,
     "learning_rate_decay":0.999,
     "model":"mlp",
-    "epoch":500
+    "epoch":50,
+    "lambda_l2": 0.1
 }
 
 ### Algorithm: fine-tune pre-trained model
@@ -145,6 +146,8 @@ if __name__=="__main__":
 
     # models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, inputData, inputLabel, **prototypicalNetworkArgs)
     # models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
-    models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
 
     # models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)
+
+    models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
+    # models.binary_classifier.test_novel_classifier(sess, testData, testLabel, **binaryClassifierArgs)

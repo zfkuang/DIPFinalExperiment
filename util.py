@@ -145,5 +145,18 @@ def loadBaseClassifier():
         bias = bias.reshape((1, -1))
         data = np.concatenate((kernel, bias))
         data = np.reshape(data, (np.multiply.reduce(data.shape)))
-        classifier.append(data)
+        classifier[int(name.split('_')[-1])] = data
+    return np.array(classifier)
+
+def loadNovelClassifier():
+    param_dicts = np.load("data/novel_classifier.npy").item()
+    classifier = [[]] * len(param_dicts.keys())
+    for name, param_dict in param_dicts.items():
+        param_dict = param_dict.item()
+        kernel = param_dict['kernel']
+        bias = param_dict['bias']
+        bias = bias.reshape((1, -1))
+        data = np.concatenate((kernel, bias))
+        data = np.reshape(data, (np.multiply.reduce(data.shape)))
+        classifier[int(name.split('_')[-1])] = data
     return np.array(classifier)
