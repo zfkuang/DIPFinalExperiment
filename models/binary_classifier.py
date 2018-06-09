@@ -45,7 +45,6 @@ class binary_classifier(object):
         #Very ugly code, we directly choose variables that should be trained,
         #since setting them as not trainable in reuse mode has no effect at all.
         self.params = tf.trainable_variables()
-        print(self.params)
 
         self.train_op = tf.train.AdamOptimizer(self.learning_rate).minimize(self.loss, global_step=self.global_step, var_list=self.params)
 
@@ -53,6 +52,24 @@ class binary_classifier(object):
                                 #    max_to_keep=3, pad_step_number=True, keep_checkpoint_every_n_hours=1.0)
 
         sess.run(tf.global_variables_initializer())
+
+        if kwargs['test'] == True:
+            self.load_initial_weights(sess, **kwargs)
+
+    def load_initial_weights(self, sess, **kwargs):
+        weights_dict = np.load(kwargs['weight_path'], encoding='bytes').item()
+        for op_name in weights_dict:
+            print("loading ", op_name)
+            with tf.variable_scope('encoder', reuse=True):
+                data = weights_dict[op_name]
+                # Biases
+                if len(data.shape) == 1:
+                    var = tf.get_variable('dense/bias', trainable=False)
+                    sess.run(var.assign(data))
+                # Weights
+                else:
+                    var = tf.get_variable('dense/kernel', trainable=False)
+                    sess.run(var.assign(data))
 
     def train_epoch(self, sess, data, label, **kwargs):
         loss, acc = 0.0, 0.0
@@ -67,7 +84,7 @@ class binary_classifier(object):
         loss /= times
         acc /= times
 
-        print( tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='encoder'))
+        # print( tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='encoder'))
         # print(tf.global_variables())
 
         return loss, acc
@@ -94,7 +111,6 @@ class binary_classifier(object):
             str_name = key
             if str_name.find('Adam') > -1:
                 continue
-            print('tensor_name:' , str_name)
             if (str_name == 'encoder/dense/kernel'):
                 kernel = reader.get_tensor(key)
             if (str_name == 'encoder/dense/bias'):
@@ -125,6 +141,9 @@ def train_base_classifier(sess, trainData, trainLabel, trainIndex, **kwargs):
         data = np.concatenate((pos_data, neg_data))
         label = np.concatenate((pos_label, neg_label))
         data, label = util.shuffle(data, label)
-        classify(sess, data, label, None, None, trainNum=i, **kwargs)
+        classify(sess, data, label, None, None, trainNum=i, test=False, **kwargs)
         tf.get_variable_scope().reuse_variables()
 
+def test_base_classifier(sess, testData, testLabel, **kwargs):
+    net = binary_classifier(sess, test=True, **kwargs)
+    print(net.test(sess, testData, testLabel))
