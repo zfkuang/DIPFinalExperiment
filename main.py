@@ -96,15 +96,18 @@ prototypicalNetworkArgs = {
 
 if __name__=="__main__":
 
-    # Initialization
+    # InitializationD
     sess = tf.Session()
-    inputData, inputLabel = util.uploadData(sess)
+    trainData, trainLabel = util.uploadData(sess, sampleNumber=500, dataFolder="training", fileNameRegex=r"(?P<group>\d{3})_(?P<index>\d{4}).jpg", groupInFilename=True)
+    testData, testLabel = util.uploadData(sess, sampleNumber=2500, dataFolder="testing", fileNameRegex=r"testing_(?P<index>\d*).jpg", groupInFilename=False)
+
     #inputData = util.normalization(inputData)
-    trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
+    #trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
     basicData, basicLabel, basicIndex = util.uploadBasicData()
     print("trainDataset shape:", trainData.shape, trainLabel.shape)
     print("TestDataset shape:", testData.shape, testLabel.shape)
     print("SourceDataset shape:", basicData.shape, basicLabel.shape, basicIndex[10])
+    
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 
@@ -112,9 +115,6 @@ if __name__=="__main__":
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
 
     # Feature extraction
-    # data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
-    # model = layer.AlexNet(data_, 1, 1000, [])
-    # model.load_initial_weights(sess)
     # trainData = util.extractFeature(sess, model, trainData)
     # testData = util.extractFeature(sess, model, testData)
 
