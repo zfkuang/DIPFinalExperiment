@@ -17,7 +17,8 @@ binaryClassifierArgs = {
     "keep_prob":0.5,
     "learning_rate":0.005,
     "learning_rate_decay":0.999,
-    "model":"mlp"
+    "model":"mlp",
+    "epoch":500
 }
 
 ### Algorithm: fine-tune pre-trained model
@@ -100,7 +101,13 @@ if __name__=="__main__":
     sess = tf.Session()
     inputData, inputLabel = util.uploadData(sess)
     #inputData = util.normalization(inputData)
-    trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
+
+    # trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
+    trainData = np.load('train_4096_fc7.npy')
+    trainLabel = np.load('trainlabel_350_fc7.npy')
+    testData = np.load('test_4096_fc7.npy')
+    testLabel = np.load('testlabel_150_fc7.npy')
+
     basicData, basicLabel, basicIndex = util.uploadBasicData()
     print("trainDataset shape:", trainData.shape, trainLabel.shape)
     print("TestDataset shape:", testData.shape, testLabel.shape)
@@ -138,6 +145,6 @@ if __name__=="__main__":
 
     # models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, inputData, inputLabel, **prototypicalNetworkArgs)
     # models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
+    models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
 
-
-    models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)
+    # models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)

@@ -133,13 +133,18 @@ class binary_classifier(object):
         np.save(modelPath + "save.npy", network)
 
 
-def classify(sess, trainData, trainLabel, testData, testLabel, **kwargs):
+def classify(sess, pos_data, neg_data, pos_label, neg_label, testData, testLabel, **kwargs):
     net = binary_classifier(sess, **kwargs)
 
-    trainData, trainLabel = util.shuffle(trainData, trainLabel)
-    print(kwargs['trainNum'], "train", net.train_epoch(sess, trainData, trainLabel, **kwargs))
-    # print(kwargs['trainNum'], "test", net.test(sess, testData, testLabel))
-    # print(net.inference(sess, testData))
+    for i in range(kwargs['epoch']):
+        train_neg_data, train_neg_label = util.shuffle(neg_data, neg_label)
+        trainData = np.concatenate((pos_data, train_neg_data[:10]))
+        trainLabel = np.concatenate((pos_label, train_neg_label[:10]))
+        trainData, trainLabel = util.shuffle(trainData, trainLabel)
+        # print(kwargs['trainNum'], "train", net.train_epoch(sess, trainData, trainLabel, **kwargs))
+        # print(kwargs['trainNum'], "test", net.test(sess, testData, testLabel))
+        # print(net.inference(sess, testData))
+    print(kwargs['trainNum'], "test", net.test(sess, testData, testLabel))
     net.save_model(sess, **kwargs)
 
 
@@ -156,6 +161,40 @@ def train_base_classifier(sess, trainData, trainLabel, trainIndex, **kwargs):
         label = np.concatenate((pos_label, neg_label))
         data, label = util.shuffle(data, label)
         classify(sess, data, label, None, None, trainNum=i, test=False, **kwargs)
+        tf.get_variable_scope().reuse_variables()
+
+def train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **kwargs):
+    for i in range(50):
+        indexlist = []
+        for j, label in enumerate(trainLabel):
+            if int(label) == i:
+                indexlist.append(j)
+        pos_data = trainData[indexlist]
+        pos_label = [1] * len(indexlist)
+        templist = list(np.arange(0, len(trainData)))
+        for l in indexlist:
+            templist.remove(l)
+        np.random.shuffle(templist)
+        neg_data = trainData[templist]
+        neg_label = [0] * len(templist)
+        data = np.concatenate((pos_data, neg_data))
+        label = np.concatenate((pos_label, neg_label))
+
+        indexlist = []
+        for j, l in enumerate(testLabel):
+            if int(l) == i:
+                indexlist.append(j)
+        pos_data_test = testData[indexlist]
+        pos_label_test = [1] * len(indexlist)
+        # templist = list(np.arange(0, len(testData)))
+        # for l in indexlist:
+        #     templist.remove(l)
+        # neg_data = testData[templist]
+        # neg_label = [0] * len(templist)
+        # data_test = np.concatenate((pos_data, neg_data))
+        # label_test = np.concatenate((pos_label, neg_label))
+
+        classify(sess, np.array(pos_data), np.array(neg_data), np.array(pos_label), np.array(neg_label), np.array(pos_data_test), np.array(pos_label_test), trainNum=i, test=False, **kwargs)
         tf.get_variable_scope().reuse_variables()
 
 def test_base_classifier(sess, testData, testLabel, **kwargs):

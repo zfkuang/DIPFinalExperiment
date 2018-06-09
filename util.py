@@ -137,7 +137,7 @@ def extractFeature(sess, model, data):
 
 def loadBaseClassifier():
     param_dicts = np.load("data/base_classifier.npy").item()
-    classifier = []
+    classifier = [[]] * len(param_dicts.keys())
     for name, param_dict in param_dicts.items():
         param_dict = param_dict.item()
         kernel = param_dict['kernel']
