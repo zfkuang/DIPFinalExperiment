@@ -93,6 +93,16 @@ import models.prototypicalNetwork
 prototypicalNetworkArgs = {
 }
 
+import models.vanerModel
+vanerModelArgs = {
+    'n' : 1000,             # base classes count
+    'q' : 500,              # to be optimized
+    'p' : 8194,             # feature count
+    'lambda' : 0.5,         # to be optimized
+    'learning_rate' : 1e-2,
+    'learning_rate_decay' : 0.999
+}
+
 
 if __name__=="__main__":
 
@@ -108,17 +118,17 @@ if __name__=="__main__":
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 
-    #methods where feature extraction is not required.
+    # methods where feature extraction is not required.
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
 
-    # Feature extraction
+    # # Feature extraction
     # data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
     # model = layer.AlexNet(data_, 1, 1000, [])
     # model.load_initial_weights(sess)
     # trainData = util.extractFeature(sess, model, trainData)
     # testData = util.extractFeature(sess, model, testData)
 
-    #methods that need feature extraction.
+    # methods that need feature extraction.
     # knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
     # bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
     # baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
@@ -139,5 +149,13 @@ if __name__=="__main__":
     # models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, inputData, inputLabel, **prototypicalNetworkArgs)
     # models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
 
+    # pos_data = basicData[basicIndex[0]]
+    # pos_label = [1] * len(basicIndex[0])
+    # neg_data = basicData[basicIndex[1]]
+    # neg_label = [0] * len(basicIndex[1])
+    # data = np.concatenate((pos_data, neg_data))
+    # label = np.concatenate((pos_label, neg_label))
+    # models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)    models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)ath="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)
 
-    models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)
+    W = util.loadBaseClassifier()
+    models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, W, **vanerModelArgs)
