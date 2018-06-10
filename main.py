@@ -117,12 +117,11 @@ if __name__=="__main__":
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
 
     # Feature extraction
-
-    data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
-    model = layer.AlexNet(data_, 1, 1000, [])
-    model.load_initial_weights(sess)
-    trainData = util.extractFeature(sess, model, trainData)
-    testData = util.extractFeature(sess, model, testData)
+    # data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
+    # model = layer.AlexNet(data_, 1, 1000, [])
+    # model.load_initial_weights(sess)
+    # trainData = util.extractFeature(sess, model, trainData)
+    # testData = util.extractFeature(sess, model, testData)
 
     print(trainData.shape)
     print(testData.shape)
@@ -140,17 +139,18 @@ if __name__=="__main__":
     #logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
     #linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
 
+    trainData = trainData.reshape(50, 10, 4096)
+    # testData = testData.reshape(50, 50, 4096)
+    trainLabel = trainLabel.reshape(50, 10)
+    # testLabel = testLabel.reshape(50, 50)
+    # inputData = np.concatenate((trainData, testData), axis=1)
+    # inputLabel = np.concatenate((trainLabel, testLabel), axis=1)
+    # inputData = inputData.reshape(500, 4096)
+    # inputLabel = inputLabel.reshape(500)
 
-    trainData = trainData.reshape(50, 7, 4096)
-    testData = testData.reshape(50, 3, 4096)
-    trainLabel = trainLabel.reshape(50, 7)
-    testLabel = testLabel.reshape(50, 3)
-    inputData = np.concatenate((trainData, testData), axis=1)
-    inputLabel = np.concatenate((trainLabel, testLabel), axis=1)
-    inputData = inputData.reshape(500, 4096)
-    inputLabel = inputLabel.reshape(500)
+    models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, **prototypicalNetworkArgs)
 
-    models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, inputData, inputLabel, **prototypicalNetworkArgs)
+    #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
 
     # models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
     # models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)

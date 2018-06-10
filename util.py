@@ -24,7 +24,7 @@ def extractFeature(sess, model, data):
     return sess.run([model.fc7], feed_dict={model.X:data})[0]
 
 def uploadData(sess, sampleNumber, dataFolder, fileNameRegex, groupInFilename):
-    
+
     inputData, inputLabel = None, None
 
     if os.path.exists("data//"+dataFolder) != True:
@@ -74,7 +74,7 @@ def uploadData(sess, sampleNumber, dataFolder, fileNameRegex, groupInFilename):
                         inputData[totalCnt-batchCnt:totalCnt] = extractFeature(sess, model, batchInputData)[:batchCnt]
                         tf.reset_default_graph()
                         batchCnt = 0
-        iind = np.copy(ind) 
+        iind = np.copy(ind)
         for i in range(ind.shape[0]):
             iind[ind[i]] = i
         inputData = inputData[iind]
@@ -84,7 +84,6 @@ def uploadData(sess, sampleNumber, dataFolder, fileNameRegex, groupInFilename):
         inputData = np.load(npFileName)
         print(inputData.shape)
 
-    pdb.set_trace()
     return inputData, inputLabel
 
 def uploadBasicData():

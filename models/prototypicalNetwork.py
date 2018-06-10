@@ -39,7 +39,12 @@ def euclidean_distance(a, b):
     M = tf.shape(b)[0]
     a = tf.tile(tf.expand_dims(a, axis=1), (1, M, 1))
     b = tf.tile(tf.expand_dims(b, axis=0), (N, 1, 1))
+    print(a.shape, M, N, D)
     return tf.reduce_mean(tf.square(a - b), axis=2)
+
+    # use cosine similarity:
+
+
 
 n_epochs = 100
 n_episodes = 100
@@ -88,7 +93,7 @@ def prototypicalNetwork(sess, trainData, trainLabel, trainIndex, testData, testL
     dists = euclidean_distance(emb_q, emb_x)
     log_p_y = tf.reshape(tf.nn.log_softmax(-dists), [num_queries, -1])
     ce_loss = -tf.reduce_mean(tf.reshape(tf.reduce_sum(tf.multiply(y_one_hot, log_p_y), axis=-1), [-1]))
-    logits = tf.argmax(log_p_y, axis=-1) 
+    logits = tf.argmax(log_p_y, axis=-1)
     acc = tf.reduce_mean(tf.to_float(tf.equal(logits, y)))
 
     params = tf.trainable_variables()[-6:]
@@ -121,7 +126,7 @@ def prototypicalNetwork(sess, trainData, trainLabel, trainIndex, testData, testL
 
         print('Testing...')
         acc_ = []
-        loss_ = []        
+        loss_ = []
         # for epi in range(n_test_episodes):
         #     epi_classes = np.random.permutation(n_test_classes)[:n_test_way]
         #     support = np.zeros([n_test_way, n_test_shot, n_features], dtype=np.float32)
@@ -162,4 +167,4 @@ def prototypicalNetwork(sess, trainData, trainLabel, trainIndex, testData, testL
                 #print(logit[:5])
             acc_.append(ac)
             loss_.append(ls)
-        print('Average Test Accuracy: {:.5f}, Loss: {:.5f}'.format(np.mean(acc_), np.mean(loss_)))    
+        print('Average Test Accuracy: {:.5f}, Loss: {:.5f}'.format(np.mean(acc_), np.mean(loss_)))
