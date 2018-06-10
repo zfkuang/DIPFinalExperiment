@@ -32,22 +32,42 @@ def encoder(x, output_dim, keep_prob, reuse=False):
         #net = tf.contrib.layers.flatten(net)
         return net #, net
 
-def euclidean_distance(a, b):
+def get_distance(a, b, keep_prob, reuse=False):
     # a.shape = N x D
     # b.shape = M x D
     N, D = tf.shape(a)[0], tf.shape(a)[1]
     M = tf.shape(b)[0]
     a = tf.tile(tf.expand_dims(a, axis=1), (1, M, 1))
     b = tf.tile(tf.expand_dims(b, axis=0), (N, 1, 1))
-    #return tf.reduce_mean(tf.square(a - b), axis=2)
+    # a.shape = b.shape = N x M x D
+
+    # use euclidean_distance
+    # return tf.reduce_mean(tf.square(a - b), axis=2)
 
     # use cosine similarity:
-    a_norm = tf.norm(a, axis=2)
-    b_norm = tf.norm(b, axis=2)
-    norm_product = tf.multiply(a_norm, b_norm)
-    dot = tf.reduce_sum(tf.multiply(a, b), axis=2)
-    ones = tf.ones(shape=tf.shape(dot))
-    return 10 * (tf.subtract(ones, tf.divide(dot, norm_product)))
+    # a_norm = tf.norm(a, axis=2)
+    # b_norm = tf.norm(b, axis=2)
+    # norm_product = tf.multiply(a_norm, b_norm)
+    # dot = tf.reduce_sum(tf.multiply(a, b), axis=2)
+    # ones = tf.ones(shape=tf.shape(dot))
+    # return 10 * (tf.subtract(ones, tf.divide(dot, norm_product)))
+
+    # use deep network
+    return distanceNetwork(a, b, keep_prob, reuse=reuse)
+
+def distanceNetwork(a, b, keep_prob, reuse=False):
+    # use deep network
+    x = tf.concat(2, [a, b])
+    x = tf.reshape(x, (-1, tf.shape(x)[-1]))
+    with tf.variable_scope('distance', reuse=reuse):
+        net = tf.layers.dense(x, 300, activation=tf.nn.relu, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
+        net = tf.contrib.layers.batch_norm(net, updates_collections=None, decay=0.99, scale=True, center=True)
+        net = tf.nn.dropout(net, keep_prob)
+        net = tf.layers.dense(net, 200, activation=tf.nn.relu, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
+        net = tf.contrib.layers.batch_norm(net, updates_collections=None, decay=0.99, scale=True, center=True)
+        net = tf.nn.dropout(net, keep_prob)
+        net = tf.layers.dense(net, 1, activation=None, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
+        return tf.reshape(net, shape=(tf.shape(a)[0], tf.shape(a)[1]))
 
 n_epochs = 100
 n_episodes = 100
@@ -64,6 +84,9 @@ n_test_way = 50
 n_test_example = 10
 n_test_shot = 7
 n_test_query = 3
+
+loss_lambda = 1
+learning_rate = 0.001
 
 def prototypicalNetwork(sess, trainData, trainLabel, trainIndex, testData, testLabel, sourceClassNumber=1000, novelClassNumber=50, **kwargs):
     # Load Train Dataset
@@ -89,19 +112,29 @@ def prototypicalNetwork(sess, trainData, trainLabel, trainIndex, testData, testL
     num_queries = q_shape[0]
     y = tf.placeholder(tf.int64, [None]) # num_queries
     y_one_hot = tf.one_hot(y, depth=num_classes)
-    emb_x = encoder(tf.reshape(x, [num_classes * num_support, n_features]), output_dim, keep_prob)
-    emb_dim = tf.shape(emb_x)[-1]
-    emb_x = tf.reduce_mean(tf.reshape(emb_x, [num_classes, num_support, emb_dim]), axis=1)
+    emb_x_all = encoder(tf.reshape(x, [num_classes * num_support, n_features]), output_dim, keep_prob)
+    emb_dim = tf.shape(emb_x_all)[-1]
+    emb_x = tf.reduce_mean(tf.reshape(emb_x_all, [num_classes, num_support, emb_dim]), axis=1)
     emb_q = encoder(q, output_dim, keep_prob, reuse=True)
-    dists = euclidean_distance(emb_q, emb_x)
+    dists = get_distance(emb_q, emb_x, keep_prob)
     log_p_y = tf.reshape(tf.nn.log_softmax(-dists), [num_queries, -1])
-    ce_loss = -tf.reduce_mean(tf.reshape(tf.reduce_sum(tf.multiply(y_one_hot, log_p_y), axis=-1), [-1]))
+    # ce_loss = -tf.reduce_mean(tf.reshape(tf.reduce_sum(tf.multiply(y_one_hot, log_p_y), axis=-1), [-1]))
+    ce_loss_1 = -tf.reduce_mean(tf.reshape(tf.reduce_sum(tf.multiply(y_one_hot, log_p_y), axis=-1), [-1]))
     logits = tf.argmax(log_p_y, axis=-1)
     acc = tf.reduce_mean(tf.to_float(tf.equal(logits, y)))
 
     params = tf.trainable_variables()[-6:]
     print(params)
-    train_op = tf.train.AdamOptimizer().minimize(ce_loss, var_list=params)
+
+    emb_x_tile = tf.tile(tf.reshape(emb_x, (num_classes, 1, emb_dim)), (1, num_support, 1))
+    x_dist = distanceNetwork(tf.reshape(emb_x_all, (num_classes, num_support, emb_dim)), emb_x_tile, keep_prob, reuse=True)
+    emb_x_for_y = tf.gather_nd(emb_x, tf.reshape(y, (num_queries, 1)))
+    q_dist = distanceNetwork(emb_x_for_y, emb_q, keep_prob, reuse=True)
+    dist_loss = tf.reduce_mean(x_dist) + tf.reduce_mean(q_dist)
+
+    ce_loss = ce_loss_1 + loss_lambda * dist_loss
+
+    train_op = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(ce_loss, var_list=params)
 
     sess.run(tf.global_variables_initializer())
     #with tf.variable_scope('encoder', reuse=True):
@@ -122,10 +155,10 @@ def prototypicalNetwork(sess, trainData, trainLabel, trainIndex, testData, testL
             # labels in training doesn't matter at all
             labels = np.tile(np.arange(n_way)[:, np.newaxis], (1, n_query)).astype(np.uint8)
             labels = labels.reshape([n_way*n_query])
-            _, ls, ac, logy = sess.run([train_op, ce_loss, acc, log_p_y], feed_dict={x: support, q: query, y:labels, keep_prob: 0.4})
+            _, ls, dls, ac, logy = sess.run([train_op, ce_loss, dist_loss, acc, log_p_y], feed_dict={x: support, q: query, y:labels, keep_prob: 0.4})
             if (epi+1) % 50 == 0:
                 #print(logy[:5])
-                print('[epoch {}/{}, episode {}/{}] => loss: {:.5f}, acc: {:.5f}'.format(ep+1, n_epochs, epi+1, n_episodes, ls, ac))
+                print('[epoch {}/{}, episode {}/{}] => loss: {:.5f},{:.5f} acc: {:.5f}'.format(ep+1, n_epochs, epi+1, n_episodes, ls, dls, ac))
         print('Testing...')
         acc_ = []
         loss_ = []
