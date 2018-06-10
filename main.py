@@ -95,6 +95,16 @@ import models.prototypicalNetwork
 prototypicalNetworkArgs = {
 }
 
+import models.vanerModel
+vanerModelArgs = {
+    'n' : 1000,             # base classes count
+    'q' : 600,              # to be optimized
+    'p' : 8194,             # feature count
+    'lambda' : 0.2,         # to be optimized
+    'learning_rate' : 1e-2,
+    'learning_rate_decay' : 0.999
+}
+
 
 if __name__=="__main__":
 
@@ -113,7 +123,7 @@ if __name__=="__main__":
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 
-    #methods where feature extraction is not required.
+    # methods where feature extraction is not required.
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
 
     # Feature extraction
@@ -155,5 +165,15 @@ if __name__=="__main__":
     # models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
     # models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)
 
+    # pos_data = basicData[basicIndex[0]]
+    # pos_label = [1] * len(basicIndex[0])
+    # neg_data = basicData[basicIndex[1]]
+    # neg_label = [0] * len(basicIndex[1])
+    # data = np.concatenate((pos_data, neg_data))
+    # label = np.concatenate((pos_label, neg_label))
+    # models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)    models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)ath="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)
+
+    # W = util.loadBaseClassifier()
+    # models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, None, W, **vanerModelArgs)
     # models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
     # models.binary_classifier.test_novel_classifier(sess, testData, testLabel, **binaryClassifierArgs)
