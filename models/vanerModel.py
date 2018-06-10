@@ -77,27 +77,6 @@ def train(sess, A, W, **kwargs):
 
     model.save_model(sess, **kwargs)
     return model
-    
-
-def save_model(self, sess, **kwargs):
-    saver = tf.train.Saver()
-    if not os.path.exists("data/save_model"):
-        os.mkdir("data/save_model")
-    modelPath = "data/save_model/"
-    checkpoint_path = modelPath + "vanerModel.ckpt"
-    saver.save(sess, checkpoint_path)
-    reader=pywrap_tensorflow.NewCheckpointReader(checkpoint_path)
-    var_to_shape_map=reader.get_variable_to_shape_map()
-
-    for key in var_to_shape_map:
-        str_name = key
-        if str_name.find('Adam') > -1:
-            continue
-        print('tensor_name:' , str_name)
-        if (str_name == 'W'):
-            V = reader.get_tensor(key)
-    network = {"V": V, "T": T}
-    np.save("data/vanerModel.npy", network)
 
 
 def trainVanerModel(sess, trainData, trainLabel, trainIndex, a, W, **kwargs):
