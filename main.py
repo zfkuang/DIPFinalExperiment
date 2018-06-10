@@ -19,7 +19,7 @@ binaryClassifierArgs = {
     "learning_rate_decay":0.999,
     "model":"mlp",
     "epoch":50,
-    "lambda_l2": 0.1
+    "lambda_l2": 0.005
 }
 
 ### Algorithm: fine-tune pre-trained model
