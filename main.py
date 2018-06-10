@@ -106,35 +106,48 @@ vanerModelArgs = {
 
 if __name__=="__main__":
 
-    # Initialization
+    # InitializationD
     sess = tf.Session()
-    inputData, inputLabel = util.uploadData(sess)
+    trainData, trainLabel = util.uploadData(sess, sampleNumber=500, dataFolder="training", fileNameRegex=r"(?P<group>\d{3})_(?P<index>\d{4}).jpg", groupInFilename=True)
+    testData, testLabel = util.uploadData(sess, sampleNumber=2500, dataFolder="testing", fileNameRegex=r"testing_(?P<index>\d*).jpg", groupInFilename=False)
+
     #inputData = util.normalization(inputData)
-    trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
+    #trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
     basicData, basicLabel, basicIndex = util.uploadBasicData()
     print("trainDataset shape:", trainData.shape, trainLabel.shape)
     print("TestDataset shape:", testData.shape, testLabel.shape)
     print("SourceDataset shape:", basicData.shape, basicLabel.shape, basicIndex[10])
+    
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 
     # methods where feature extraction is not required.
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
 
-    # # Feature extraction
-    # data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
-    # model = layer.AlexNet(data_, 1, 1000, [])
-    # model.load_initial_weights(sess)
+    # Feature extraction
+
+    data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
+    model = layer.AlexNet(data_, 1, 1000, [])
+    model.load_initial_weights(sess)
+    trainData = util.extractFeature(sess, model, trainData)
+    testData = util.extractFeature(sess, model, testData)
+
+    print(trainData.shape)
+    print(testData.shape)
+    #np.save('train_4096_fc7.npy', trainData)
+    #np.save('test_4096_fc7.npy', testData)
+    #np.save('trainlabel_350_fc7.npy', trainLabel)
+    #np.save('testlabel_150_fc7.npy', testLabel)
     # trainData = util.extractFeature(sess, model, trainData)
     # testData = util.extractFeature(sess, model, testData)
 
-    # methods that need feature extraction.
-    # knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
-    # bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
-    # baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
-    # decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
-    # logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
-    # linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
+    #methods that need feature extraction.
+    #knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
+    #bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
+    #baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    #decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
+    #logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
+    #linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
 
 
     # trainData = trainData.reshape(50, 7, 4096)
@@ -147,6 +160,9 @@ if __name__=="__main__":
     # inputLabel = inputLabel.reshape(500)
 
     # models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, inputData, inputLabel, **prototypicalNetworkArgs)
+
+    #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
+
     # models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
 
     # pos_data = basicData[basicIndex[0]]
@@ -157,5 +173,6 @@ if __name__=="__main__":
     # label = np.concatenate((pos_label, neg_label))
     # models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)    models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)ath="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)
 
-    W = util.loadBaseClassifier()
-    models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, None, W, **vanerModelArgs)
+    # W = util.loadBaseClassifier()
+    # models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, None, W, **vanerModelArgs)
+    #models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)
