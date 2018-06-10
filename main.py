@@ -96,15 +96,18 @@ prototypicalNetworkArgs = {
 
 if __name__=="__main__":
 
-    # Initialization
+    # InitializationD
     sess = tf.Session()
-    inputData, inputLabel = util.uploadData(sess)
+    trainData, trainLabel = util.uploadData(sess, sampleNumber=500, dataFolder="training", fileNameRegex=r"(?P<group>\d{3})_(?P<index>\d{4}).jpg", groupInFilename=True)
+    testData, testLabel = util.uploadData(sess, sampleNumber=2500, dataFolder="testing", fileNameRegex=r"testing_(?P<index>\d*).jpg", groupInFilename=False)
+
     #inputData = util.normalization(inputData)
-    trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
+    #trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
     basicData, basicLabel, basicIndex = util.uploadBasicData()
     print("trainDataset shape:", trainData.shape, trainLabel.shape)
     print("TestDataset shape:", testData.shape, testLabel.shape)
     print("SourceDataset shape:", basicData.shape, basicLabel.shape, basicIndex[10])
+    
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 
@@ -112,6 +115,7 @@ if __name__=="__main__":
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
 
     # Feature extraction
+
     data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
     model = layer.AlexNet(data_, 1, 1000, [])
     model.load_initial_weights(sess)
@@ -120,10 +124,13 @@ if __name__=="__main__":
 
     print(trainData.shape)
     print(testData.shape)
-    np.save('train_4096_fc7.npy', trainData)
-    np.save('test_4096_fc7.npy', testData)
-    np.save('trainlabel_350_fc7.npy', trainLabel)
-    np.save('testlabel_150_fc7.npy', testLabel)
+    #np.save('train_4096_fc7.npy', trainData)
+    #np.save('test_4096_fc7.npy', testData)
+    #np.save('trainlabel_350_fc7.npy', trainLabel)
+    #np.save('testlabel_150_fc7.npy', testLabel)
+    # trainData = util.extractFeature(sess, model, trainData)
+    # testData = util.extractFeature(sess, model, testData)
+
     #methods that need feature extraction.
     #knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
     #bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
@@ -143,4 +150,11 @@ if __name__=="__main__":
     # inputLabel = inputLabel.reshape(500)
 
     # models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, inputData, inputLabel, **prototypicalNetworkArgs)
+<<<<<<< HEAD
     #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
+=======
+    # models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
+
+
+    models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)
+>>>>>>> 453cbe9081a1665695667eb98a5673c19c50f833

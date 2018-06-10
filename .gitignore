@@ -111,6 +111,5 @@ data/training/*
 data/testing/*
 data/save_model
 *.npy
-
 # Mac OS
 .DS_Store
