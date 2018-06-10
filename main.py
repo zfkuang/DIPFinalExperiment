@@ -22,6 +22,18 @@ binaryClassifierArgs = {
     "lambda_l2": 0.005
 }
 
+
+import models.multi_classifier
+multiClassifierArgs = {
+    "batch_size":5,
+    "keep_prob":0.5,
+    "learning_rate":0.001,
+    "learning_rate_decay":0.999,
+    "model":"mlp",
+    "epoch":100,
+    "lambda_l2": 0.005
+}
+
 ### Algorithm: fine-tune pre-trained model
 ## usage: fineTune(sess, trainData, trainLabel, testData, testLabel, **kwargs)
 import baseline.fineTune
@@ -148,7 +160,7 @@ if __name__=="__main__":
     # inputData = inputData.reshape(500, 4096)
     # inputLabel = inputLabel.reshape(500)
 
-    models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, **prototypicalNetworkArgs)
+    # models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, **prototypicalNetworkArgs)
 
     #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
 
@@ -157,3 +169,5 @@ if __name__=="__main__":
 
     # models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
     # models.binary_classifier.test_novel_classifier(sess, testData, testLabel, **binaryClassifierArgs)
+
+    models.multi_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **multiClassifierArgs)

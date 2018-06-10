@@ -66,7 +66,7 @@ def get_distance(a, b, keep_prob, reuse=False):
 
     # use cosine similarity:
     a_norm = tf.norm(a, axis=2)
-    b_norm = tf.norm(b, axis=2
+    b_norm = tf.norm(b, axis=2)
     norm_product = tf.multiply(a_norm, b_norm)
     dot = tf.reduce_sum(tf.multiply(a, b), axis=2)
     ones = tf.ones(shape=tf.shape(dot))
@@ -158,7 +158,7 @@ def prototypicalNetwork(sess, trainData, trainLabel, trainIndex, testData, testL
             # labels in training doesn't matter at all
             labels = np.tile(np.arange(n_way)[:, np.newaxis], (1, n_query)).astype(np.uint8)
             labels = labels.reshape([n_way*n_query])
-            _, ls, ac, logy = sess.run([train_op, ce_loss, dist_loss, acc, log_p_y], feed_dict={x: support, q: query, y:labels, keep_prob: 0.4})
+            _, ls, ac, logy = sess.run([train_op, ce_loss, acc, log_p_y], feed_dict={x: support, q: query, y:labels, keep_prob: 0.4})
             if (epi+1) % 50 == 0:
                 #print(logy[:5])
                 print('[epoch {}/{}, episode {}/{}] => loss: {:.5f} acc: {:.5f}'.format(ep+1, n_epochs, epi+1, n_episodes, ls, ac))
