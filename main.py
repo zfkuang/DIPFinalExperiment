@@ -139,9 +139,9 @@ if __name__=="__main__":
     #logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
     #linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
 
-    trainData = trainData.reshape(50, 10, 4096)
+    # trainData = trainData.reshape(50, 10, 4096)
     # testData = testData.reshape(50, 50, 4096)
-    trainLabel = trainLabel.reshape(50, 10)
+    # trainLabel = trainLabel.reshape(50, 10)
     # testLabel = testLabel.reshape(50, 50)
     # inputData = np.concatenate((trainData, testData), axis=1)
     # inputLabel = np.concatenate((trainLabel, testLabel), axis=1)

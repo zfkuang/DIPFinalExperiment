@@ -23,7 +23,7 @@ def encoder(x, output_dim, keep_prob, reuse=False):
         net = tf.layers.dense(net, 500, activation=tf.nn.relu, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
         net = tf.contrib.layers.batch_norm(net, updates_collections=None, decay=0.99, scale=True, center=True)
         net = tf.nn.dropout(net, keep_prob)
-        net = tf.layers.dense(net, output_dim, activation=tf.nn.relu, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
+        net = tf.layers.dense(net, output_dim, activation=None, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
         #net = tf.layer.AlexNet(x, 0.5, 2000, ["fc8"])
         #net = conv_block(x, h_dim, name='conv_1')
         #net = conv_block(net, h_dim, name='conv_2')
@@ -39,12 +39,15 @@ def euclidean_distance(a, b):
     M = tf.shape(b)[0]
     a = tf.tile(tf.expand_dims(a, axis=1), (1, M, 1))
     b = tf.tile(tf.expand_dims(b, axis=0), (N, 1, 1))
-    print(a.shape, M, N, D)
-    return tf.reduce_mean(tf.square(a - b), axis=2)
+    #return tf.reduce_mean(tf.square(a - b), axis=2)
 
     # use cosine similarity:
-
-
+    a_norm = tf.norm(a, axis=2)
+    b_norm = tf.norm(b, axis=2)
+    norm_product = tf.multiply(a_norm, b_norm)
+    dot = tf.reduce_sum(tf.multiply(a, b), axis=2)
+    ones = tf.ones(shape=tf.shape(dot))
+    return 10 * (tf.subtract(ones, tf.divide(dot, norm_product)))
 
 n_epochs = 100
 n_episodes = 100
@@ -123,7 +126,6 @@ def prototypicalNetwork(sess, trainData, trainLabel, trainIndex, testData, testL
             if (epi+1) % 50 == 0:
                 #print(logy[:5])
                 print('[epoch {}/{}, episode {}/{}] => loss: {:.5f}, acc: {:.5f}'.format(ep+1, n_epochs, epi+1, n_episodes, ls, ac))
-
         print('Testing...')
         acc_ = []
         loss_ = []
