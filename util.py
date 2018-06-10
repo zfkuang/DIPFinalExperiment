@@ -84,7 +84,7 @@ def uploadData(sess, sampleNumber, dataFolder, fileNameRegex, groupInFilename):
         inputData = np.load(npFileName)
         print(inputData.shape)
 
-    pdb.set_trace()
+    #pdb.set_trace()
     return inputData, inputLabel
 
 def uploadBasicData():

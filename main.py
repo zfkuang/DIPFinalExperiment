@@ -116,11 +116,11 @@ if __name__=="__main__":
 
     # Feature extraction
 
-    data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
-    model = layer.AlexNet(data_, 1, 1000, [])
-    model.load_initial_weights(sess)
-    trainData = util.extractFeature(sess, model, trainData)
-    testData = util.extractFeature(sess, model, testData)
+    # data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
+    # model = layer.AlexNet(data_, 1, 1000, [])
+    # model.load_initial_weights(sess)
+    # trainData = util.extractFeature(sess, model, trainData)
+    # testData = util.extractFeature(sess, model, testData)
 
     print(trainData.shape)
     print(testData.shape)
@@ -134,7 +134,7 @@ if __name__=="__main__":
     #methods that need feature extraction.
     #knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
     #bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
-    #baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
     #decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
     #logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
     #linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
