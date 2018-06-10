@@ -24,7 +24,7 @@ def extractFeature(sess, model, data):
     return sess.run([model.fc7], feed_dict={model.X:data})[0]
 
 def uploadData(sess, sampleNumber, dataFolder, fileNameRegex, groupInFilename):
-    
+
     inputData, inputLabel = None, None
 
     if os.path.exists("data//"+dataFolder) != True:
@@ -74,7 +74,7 @@ def uploadData(sess, sampleNumber, dataFolder, fileNameRegex, groupInFilename):
                         inputData[totalCnt-batchCnt:totalCnt] = extractFeature(sess, model, batchInputData)[:batchCnt]
                         tf.reset_default_graph()
                         batchCnt = 0
-        iind = np.copy(ind) 
+        iind = np.copy(ind)
         for i in range(ind.shape[0]):
             iind[ind[i]] = i
         inputData = inputData[iind]
@@ -84,7 +84,6 @@ def uploadData(sess, sampleNumber, dataFolder, fileNameRegex, groupInFilename):
         inputData = np.load(npFileName)
         print(inputData.shape)
 
-    pdb.set_trace()
     return inputData, inputLabel
 
 def uploadBasicData():
@@ -164,7 +163,7 @@ def normalization(data):
 
 def loadBaseClassifier():
     param_dicts = np.load("data/base_classifier.npy").item()
-    classifier = []
+    classifier = [[]] * len(param_dicts.keys())
     for name, param_dict in param_dicts.items():
         param_dict = param_dict.item()
         kernel = param_dict['kernel']
@@ -172,5 +171,18 @@ def loadBaseClassifier():
         bias = bias.reshape((1, -1))
         data = np.concatenate((kernel, bias))
         data = np.reshape(data, (np.multiply.reduce(data.shape)))
-        classifier.append(data)
+        classifier[int(name.split('_')[-1])] = data
+    return np.array(classifier)
+
+def loadNovelClassifier():
+    param_dicts = np.load("data/novel_classifier.npy").item()
+    classifier = [[]] * len(param_dicts.keys())
+    for name, param_dict in param_dicts.items():
+        param_dict = param_dict.item()
+        kernel = param_dict['kernel']
+        bias = param_dict['bias']
+        bias = bias.reshape((1, -1))
+        data = np.concatenate((kernel, bias))
+        data = np.reshape(data, (np.multiply.reduce(data.shape)))
+        classifier[int(name.split('_')[-1])] = data
     return np.array(classifier)

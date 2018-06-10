@@ -17,7 +17,9 @@ binaryClassifierArgs = {
     "keep_prob":0.5,
     "learning_rate":0.005,
     "learning_rate_decay":0.999,
-    "model":"mlp"
+    "model":"mlp",
+    "epoch":50,
+    "lambda_l2": 0.005
 }
 
 ### Algorithm: fine-tune pre-trained model
@@ -107,7 +109,7 @@ if __name__=="__main__":
     print("trainDataset shape:", trainData.shape, trainLabel.shape)
     print("TestDataset shape:", testData.shape, testLabel.shape)
     print("SourceDataset shape:", basicData.shape, basicLabel.shape, basicIndex[10])
-    
+
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 
@@ -115,21 +117,19 @@ if __name__=="__main__":
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
 
     # Feature extraction
-
-    data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
-    model = layer.AlexNet(data_, 1, 1000, [])
-    model.load_initial_weights(sess)
-    trainData = util.extractFeature(sess, model, trainData)
-    testData = util.extractFeature(sess, model, testData)
+    # data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
+    # model = layer.AlexNet(data_, 1, 1000, [])
+    # model.load_initial_weights(sess)
+    # trainData = util.extractFeature(sess, model, trainData)
+    # testData = util.extractFeature(sess, model, testData)
 
     print(trainData.shape)
     print(testData.shape)
+
     #np.save('train_4096_fc7.npy', trainData)
     #np.save('test_4096_fc7.npy', testData)
     #np.save('trainlabel_350_fc7.npy', trainLabel)
     #np.save('testlabel_150_fc7.npy', testLabel)
-    # trainData = util.extractFeature(sess, model, trainData)
-    # testData = util.extractFeature(sess, model, testData)
 
     #methods that need feature extraction.
     #knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
@@ -139,21 +139,21 @@ if __name__=="__main__":
     #logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
     #linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
 
-
-    # trainData = trainData.reshape(50, 7, 4096)
-    # testData = testData.reshape(50, 3, 4096)
-    # trainLabel = trainLabel.reshape(50, 7)
-    # testLabel = testLabel.reshape(50, 3)
+    # trainData = trainData.reshape(50, 10, 4096)
+    # testData = testData.reshape(50, 50, 4096)
+    # trainLabel = trainLabel.reshape(50, 10)
+    # testLabel = testLabel.reshape(50, 50)
     # inputData = np.concatenate((trainData, testData), axis=1)
     # inputLabel = np.concatenate((trainLabel, testLabel), axis=1)
     # inputData = inputData.reshape(500, 4096)
     # inputLabel = inputLabel.reshape(500)
 
-    # models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, inputData, inputLabel, **prototypicalNetworkArgs)
+    models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, **prototypicalNetworkArgs)
 
     #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
 
     # models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
+    # models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)
 
-
-    #models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)
+    # models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
+    # models.binary_classifier.test_novel_classifier(sess, testData, testLabel, **binaryClassifierArgs)
