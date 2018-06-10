@@ -43,17 +43,17 @@ class vanerModel(object):
         reader=pywrap_tensorflow.NewCheckpointReader(checkpoint_path)
         var_to_shape_map=reader.get_variable_to_shape_map()
 
-        # for key in var_to_shape_map:
-        #     str_name = key
-        #     if str_name.find('Adam') > -1:
-        #         continue
-        #     print('tensor_name:' , str_name)
-        #     if (str_name == 'encoder/dense/V'):
-        #         V = reader.get_tensor(key)
-        #     if (str_name == 'encoder/dense/T'):
-        #         T = reader.get_tensor(key)
-        # network = {"V": V, "T": T}
-        # np.save(modelPath + "vanerModel.npy", network)
+        for key in var_to_shape_map:
+            str_name = key
+            if str_name.find('Adam') > -1:
+                continue
+            # print('tensor_name:' , str_name)
+            if (str_name == 'V'):
+                V = reader.get_tensor(key)
+            if (str_name == 'T'):
+                T = reader.get_tensor(key)
+        network = {"V": V, "T": T}
+        np.save("data/vanerModel.npy", network)
 
 
     def train_epoch(self, sess, A, W, **kwargs):
@@ -67,13 +67,19 @@ def cosine_distance(x, y):
 
 
 def train(sess, A, W, **kwargs):
+    print ("Begin Training")
     model = vanerModel(sess, **kwargs)
-    while 1:
-        print("train", model.train_epoch(sess, A, W, **kwargs))
+    times = 0
+    train_times = 100
+    for _ in range(train_times):
+        model.train_epoch(sess, A, W, **kwargs)
+        print("epoch : %d" % ( _ )) 
+
     model.save_model(sess, **kwargs)
+    return model
     
 
-def trainVanerModel(sess, trainData, trainLabel, trainIndex, W, **kwargs):
+def trainVanerModel(sess, trainData, trainLabel, trainIndex, a, W, **kwargs):
     base_n = len(trainIndex)
     feature_n = trainData.shape[1]
 
@@ -94,6 +100,14 @@ def trainVanerModel(sess, trainData, trainLabel, trainIndex, W, **kwargs):
         for j in range(base_n):
             A[i][j] = cosine_distance(x[i], x[j])
     
-    train(sess, A, W, **kwargs)  
+    model = train(sess, A, W, **kwargs)  
     print("Training complete.")
+    if (a != None):
+
+        a_new = np.zeros(shape=[base_n], dtype=np.float32)
+        for i in range(base_n):
+            a_new[i] = cosine_distance(a, x[i])
+        
+        v_new = tf.matmul(a_new, tf.matmul(tf.maxtrix_inverse(tf.matmul(model.V, tf.transpose(model.V))), model.V))
+        
 

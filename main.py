@@ -96,9 +96,9 @@ prototypicalNetworkArgs = {
 import models.vanerModel
 vanerModelArgs = {
     'n' : 1000,             # base classes count
-    'q' : 500,              # to be optimized
+    'q' : 600,              # to be optimized
     'p' : 8194,             # feature count
-    'lambda' : 0.5,         # to be optimized
+    'lambda' : 0.2,         # to be optimized
     'learning_rate' : 1e-2,
     'learning_rate_decay' : 0.999
 }
@@ -158,4 +158,4 @@ if __name__=="__main__":
     # models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)    models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)ath="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)
 
     W = util.loadBaseClassifier()
-    models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, W, **vanerModelArgs)
+    models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, None, W, **vanerModelArgs)
