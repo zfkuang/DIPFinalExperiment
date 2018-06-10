@@ -5,7 +5,7 @@ import os
 import sys
 import re
 from sklearn.preprocessing import normalize
-
+import layer
 
 def imageFileToArray(session, filename):
         # load and preprocess the image
@@ -20,41 +20,71 @@ def imageFileToArray(session, filename):
         img_bgr = img_centered[:, :, ::-1]
         return session.run(img_bgr)
 
-def uploadData(sess):
+def extractFeature(sess, model, data):
+    return sess.run([model.fc7], feed_dict={model.X:data})[0]
 
-    inputData = None
+def uploadData(sess, sampleNumber, dataFolder, fileNameRegex, groupInFilename):
+    
+    inputData, inputLabel = None, None
 
-    if os.path.exists("data//training") != True:
+    if os.path.exists("data//"+dataFolder) != True:
         return None, None
 
-    if os.path.exists("data//inputData.npy") != True:
-        print("Creating new input array...")
-        inputData = np.zeros((50, 10, 227, 227, 3), dtype=np.float32)
-        imageName = r"(?P<group>\d{3})_(?P<index>\d{4}).jpg"
-        folder = "data//training"
-        for dirPath, dirNames, fileNames in os.walk(folder):
+    if groupInFilename != True:
+        print("Label info is in a file, reading label file...")
+        inputLabel = np.load("data//testingLabel.npy")
+        inputLabel = inputLabel-np.min(inputLabel)
+    else:
+        inputLabel = np.zeros((500), dtype=np.uint32)
+        for i in range(50):
+            for j in range(10):
+                inputLabel[i*10+j] = i
+
+    npFileName = "data//"+dataFolder+"Data.npy"
+    if os.path.exists(npFileName) != True:
+        print("Creating new datafile of dataset: "+dataFolder)
+        inputData = np.zeros((sampleNumber, 4096), dtype=np.float32)
+        batchInputData = np.zeros((300, 227, 227, 3), dtype=np.float32)
+        batchCnt = 0
+        totalCnt = 0
+        ind = np.zeros(sampleNumber, dtype=np.int32)
+        imageName = fileNameRegex
+        for dirPath, dirNames, fileNames in os.walk("data//"+dataFolder):
             #print(dirPath, dirNames, fileNames)
             for fileName in fileNames:
                 matchResult = re.match(imageName, fileName)
                 if matchResult != None:
                     temp = matchResult.groupdict()
-                    #print(matchResult.groupdict())
-                    print(temp['group'], temp['index'])
-                    group = int(temp['group'])
-                    index = int(temp['index'])
-                    inputData[group-1][index-1] = imageFileToArray(sess, dirPath+"//"+fileName)
-        np.save("data//inputData.npy", inputData)
+                    if groupInFilename == True:
+                        group = int(temp['group'])-1
+                        index = int(temp['index'])-1
+                        ind[totalCnt] = group*10+index
+                        print(group, index)
+                    else:
+                        index = int(temp['index'])-1
+                        ind[totalCnt] = index
+                        print(index)
+                    batchInputData[batchCnt] = imageFileToArray(sess, dirPath+"//"+fileName)
+                    batchCnt = batchCnt+1
+                    totalCnt = totalCnt+1
+                    if batchCnt==300 or totalCnt==sampleNumber:
+                        data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
+                        model = layer.AlexNet(data_, 1, 1000, [])
+                        model.load_initial_weights(sess)
+                        inputData[totalCnt-batchCnt:totalCnt] = extractFeature(sess, model, batchInputData)[:batchCnt]
+                        tf.reset_default_graph()
+                        batchCnt = 0
+        iind = np.copy(ind) 
+        for i in range(ind.shape[0]):
+            iind[ind[i]] = i
+        inputData = inputData[iind]
+        np.save(npFileName, inputData)
     else:
-        print("Loading input array file...")
-        inputData = np.load("data//inputData.npy")
+        print("Loading datafile of dataset: "+dataFolder)
+        inputData = np.load(npFileName)
         print(inputData.shape)
 
-    print("Generating label...")
-    inputLabel = np.zeros((50, 10), dtype=np.int32)
-    for group in range(0, 50):
-        for index in range(0, 10):
-            inputLabel[group, index] = group
-
+    pdb.set_trace()
     return inputData, inputLabel
 
 def uploadBasicData():
@@ -131,9 +161,6 @@ def normalization(data):
     data = data.reshape((data.shape[0], np.multiply.reduce(data.shape[1:])))
     data = normalize(data)
     return data.reshape(originShape)
-
-def extractFeature(sess, model, data):
-    return sess.run([model.fc7], feed_dict={model.X:data})[0]
 
 def loadBaseClassifier():
     param_dicts = np.load("data/base_classifier.npy").item()
