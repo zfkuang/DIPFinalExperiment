@@ -149,7 +149,6 @@ if __name__=="__main__":
     #logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
     #linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
 
-
     # trainData = trainData.reshape(50, 7, 4096)
     # testData = testData.reshape(50, 3, 4096)
     # trainLabel = trainLabel.reshape(50, 7)
