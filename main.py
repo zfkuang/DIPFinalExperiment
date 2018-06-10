@@ -145,7 +145,7 @@ if __name__=="__main__":
     #knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
     #bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
     #baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
-    #decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
+    # decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
     #logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
     #linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
 
@@ -158,7 +158,14 @@ if __name__=="__main__":
     # inputData = inputData.reshape(500, 4096)
     # inputLabel = inputLabel.reshape(500)
 
+
     #models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, **prototypicalNetworkArgs)
+
+    pNetwork = models.prototypicalNetwork.prototypicalNetwork(sess)
+    pNetwork.train(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
+    tempTrainData = trainData.reshape((50, 10, 4096))
+    pNetwork.inference(sess, tempTrainData, testData)
+
 
     #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
 
