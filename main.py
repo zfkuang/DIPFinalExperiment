@@ -115,16 +115,29 @@ if __name__=="__main__":
     # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
 
     # Feature extraction
+
+    data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
+    model = layer.AlexNet(data_, 1, 1000, [])
+    model.load_initial_weights(sess)
+    trainData = util.extractFeature(sess, model, trainData)
+    testData = util.extractFeature(sess, model, testData)
+
+    print(trainData.shape)
+    print(testData.shape)
+    #np.save('train_4096_fc7.npy', trainData)
+    #np.save('test_4096_fc7.npy', testData)
+    #np.save('trainlabel_350_fc7.npy', trainLabel)
+    #np.save('testlabel_150_fc7.npy', testLabel)
     # trainData = util.extractFeature(sess, model, trainData)
     # testData = util.extractFeature(sess, model, testData)
 
     #methods that need feature extraction.
-    # knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
-    # bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
-    # baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
-    # decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
-    # logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
-    # linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
+    #knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
+    #bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
+    #baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    #decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
+    #logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
+    #linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
 
 
     # trainData = trainData.reshape(50, 7, 4096)
@@ -137,7 +150,10 @@ if __name__=="__main__":
     # inputLabel = inputLabel.reshape(500)
 
     # models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, inputData, inputLabel, **prototypicalNetworkArgs)
+
+    #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
+
     # models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
 
 
-    models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)
+    #models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)
