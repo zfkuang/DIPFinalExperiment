@@ -150,11 +150,10 @@ if __name__=="__main__":
     # inputLabel = inputLabel.reshape(500)
 
     # models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, inputData, inputLabel, **prototypicalNetworkArgs)
-<<<<<<< HEAD
+
     #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
-=======
+
     # models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
 
 
-    models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)
->>>>>>> 453cbe9081a1665695667eb98a5673c19c50f833
+    #models.binary_classifier.test_base_classifier(sess, basicData, basicLabel, **binaryClassifierArgs)
