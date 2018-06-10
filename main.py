@@ -91,7 +91,7 @@ decisionTreeArgs = {
     'missing': 1
 }
 
-import models.prototypicalNetwork
+#import models.prototypicalNetwork
 prototypicalNetworkArgs = {
 }
 
@@ -158,7 +158,7 @@ if __name__=="__main__":
     # inputData = inputData.reshape(500, 4096)
     # inputLabel = inputLabel.reshape(500)
 
-    models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, **prototypicalNetworkArgs)
+    #models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, **prototypicalNetworkArgs)
 
     #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
 
@@ -173,7 +173,9 @@ if __name__=="__main__":
     # label = np.concatenate((pos_label, neg_label))
     # models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)    models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)ath="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)
 
-    # W = util.loadBaseClassifier()
-    # models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, None, W, **vanerModelArgs)
-    # models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
-    # models.binary_classifier.test_novel_classifier(sess, testData, testLabel, **binaryClassifierArgs)
+    W = util.loadBaseClassifier()
+    feature_avg = np.load('data\\feature_avg.npy')
+    print(feature_avg.shape)
+    models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, feature_avg, W, **vanerModelArgs)
+    #models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
+    #models.binary_classifier.test_novel_classifier(sess, testData, testLabel, **binaryClassifierArgs)

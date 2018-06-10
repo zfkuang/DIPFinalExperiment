@@ -70,7 +70,7 @@ def train(sess, A, W, **kwargs):
     print ("Begin Training")
     model = vanerModel(sess, **kwargs)
     times = 0
-    train_times = 100
+    train_times = 1000
     for _ in range(train_times):
         model.train_epoch(sess, A, W, **kwargs)
         print("epoch : %d" % ( _ )) 
@@ -102,16 +102,19 @@ def trainVanerModel(sess, trainData, trainLabel, trainIndex, a, W, **kwargs):
     
     model = train(sess, A, W, **kwargs)  
     print("Training complete.")
-    if (a != None):
+    #if (a != None):
 
-        a_new = np.zeros(shape=[base_n], dtype=np.float32)
-        for i in range(base_n):
-            a_new[i] = cosine_distance(a, x[i])
+    m = a.shape[0]
+    a_new = np.zeros(shape=[m, base_n], dtype=np.float32)
+    for i in range(m):
+        for j in range(base_n):
+            a_new[i][j] = cosine_distance(a[i], x[j])
         
-        v_new = tf.matmul(a_new, tf.matmul(tf.maxtrix_inverse(tf.matmul(model.V, tf.transpose(model.V))), model.V))
-        w_new = tf.matmul(v_new, model.T)
+    v_new = tf.matmul(a_new, tf.matmul(tf.matrix_inverse(tf.matmul(model.V, tf.transpose(model.V))), model.V))
+    w_new = tf.matmul(v_new, model.T)
 
-        w_new.eval().save('data/W_new.npy')
+    with sess.as_default():
+        np.save('data/W_new.npy', w_new.eval())
 
-        return w_new
+    return w_new
 
