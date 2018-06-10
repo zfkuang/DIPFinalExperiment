@@ -7,6 +7,26 @@ import matplotlib.pyplot as plt
 import layer
 import pdb
 
+n_epochs = 100
+n_episodes = 100
+n_way = 100
+n_shot = 5
+n_query = 25
+im_width, im_height, channels = 227, 227, 3
+n_features = 4096
+h_dim = 32
+z_dim = 32
+output_dim = 500
+n_test_episodes = 100
+n_test_way = 50
+n_test_example = 10
+n_test_shot = 7
+n_test_query = 3
+
+loss_lambda = 0
+learning_rate = 0.001
+
+
 def conv_block(inputs, out_channels, name='conv'):
     with tf.variable_scope(name):
         conv = tf.layers.conv2d(inputs, out_channels, kernel_size=3, padding='SAME')
@@ -57,8 +77,8 @@ def get_distance(a, b, keep_prob, reuse=False):
 
 def distanceNetwork(a, b, keep_prob, reuse=False):
     # use deep network
-    x = tf.concat(2, [a, b])
-    x = tf.reshape(x, (-1, tf.shape(x)[-1]))
+    x = tf.concat([a, b], -1)
+    x = tf.reshape(x, (-1, output_dim * 2))
     with tf.variable_scope('distance', reuse=reuse):
         net = tf.layers.dense(x, 300, activation=tf.nn.relu, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
         net = tf.contrib.layers.batch_norm(net, updates_collections=None, decay=0.99, scale=True, center=True)
@@ -66,27 +86,9 @@ def distanceNetwork(a, b, keep_prob, reuse=False):
         net = tf.layers.dense(net, 200, activation=tf.nn.relu, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
         net = tf.contrib.layers.batch_norm(net, updates_collections=None, decay=0.99, scale=True, center=True)
         net = tf.nn.dropout(net, keep_prob)
-        net = tf.layers.dense(net, 1, activation=None, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
-        return tf.reshape(net, shape=(tf.shape(a)[0], tf.shape(a)[1]))
+        net = tf.layers.dense(net, 1, activation=tf.nn.relu, kernel_initializer=tf.truncated_normal_initializer(mean=0, stddev=0.1))
+        return tf.reshape(net, shape=tf.shape(a)[:-1])
 
-n_epochs = 100
-n_episodes = 100
-n_way = 100
-n_shot = 5
-n_query = 25
-im_width, im_height, channels = 227, 227, 3
-n_features = 4096
-h_dim = 32
-z_dim = 32
-output_dim = 500
-n_test_episodes = 100
-n_test_way = 50
-n_test_example = 10
-n_test_shot = 7
-n_test_query = 3
-
-loss_lambda = 1
-learning_rate = 0.001
 
 def prototypicalNetwork(sess, trainData, trainLabel, trainIndex, testData, testLabel, sourceClassNumber=1000, novelClassNumber=50, **kwargs):
     # Load Train Dataset
