@@ -140,7 +140,7 @@ class prototypicalNetwork(object):
         sess.run(tf.global_variables_initializer())
         #with tf.variable_scope('encoder', reuse=True):
         #    alexNet.load_initial_weights(sess)
-    def train(self, sess, trainData, trainLabel, trainIndex, inputData, inputLabel, testData, testLabel, 
+    def train(self, sess, trainData, trainLabel, trainIndex, inputData, inputLabel, testData, testLabel,
         sourceClassNumber=1000, novelClassNumber=50):
 
         inputData = inputData.reshape([novelClassNumber, inputData.shape[0]//novelClassNumber]+list(inputData.shape[1:]))
@@ -163,7 +163,7 @@ class prototypicalNetwork(object):
                 # labels in training doesn't matter at all
                 labels = np.tile(np.arange(n_way)[:, np.newaxis], (1, n_query)).astype(np.uint8)
                 labels = labels.reshape([n_way*n_query])
-                _, ls, ac, logy = sess.run([self.train_op, self.ce_loss, self.acc, self.log_p_y], 
+                _, ls, ac, logy = sess.run([self.train_op, self.ce_loss, self.acc, self.log_p_y],
                     feed_dict={self.x: support, self.q: query, self.y:labels, self.keep_prob: 0.6})
                 if (epi+1) % 50 == 0:
                     #print(logy[:5])
