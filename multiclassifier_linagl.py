@@ -52,8 +52,10 @@ np.save('data/feature_avg.npy', feature_avg)
 
 
 mc_tained_w = np.zeros((50,4096))
-if os.path.exists('data/mc_Hao_w.npy'):
-	mc_Hao_w = np.load('data/mc_Hao_w.npy')
+if os.path.exists('data/W_new.npy'):
+	mc_Hao_w = np.load('data/W_new.npy')
+	# print ("mc_hao_w.shape = ", mc_Hao_w.shape)
+	# assert(0)
 	#mc_Hao_w.npy (50 * 4096)
 
 
@@ -64,8 +66,8 @@ def get_classifier_param_linalg(feature):
 if not os.path.exists('data/mc_tained_w.npy'):
 	for i in range(50):
 		print(i)
-		mc_tained_w[i] = get_classifier_param_linalg(feature_avg[i])
-		#mc_tained_w[i] = mc_Hao_w[i] # Hao God please use this 
+		# mc_tained_w[i] = get_classifier_param_linalg(feature_avg[i])
+		mc_tained_w[i] = mc_Hao_w[i] # Hao God please use this 
 	np.save('data/mc_tained_w.npy', mc_tained_w)
 
 else:
@@ -73,7 +75,7 @@ else:
 
 
 alf = 1
-beta = 155
+beta = 0
 
 mc_tained_w = mc_tained_w * alf + novel_fc8 * beta
 
@@ -89,6 +91,7 @@ def cal_label(feature, label_):
 			id_ans = i
 	if id_ans != label_:
 		print('error')
+		print(max_ans)
 	return id_ans
 
 

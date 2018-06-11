@@ -99,9 +99,9 @@ import models.vanerModel
 vanerModelArgs = {
     'n' : 1000,             # base classes count
     'q' : 600,              # to be optimized
-    'p' : 8194,             # feature count
-    'lambda' : 0.2,         # to be optimized
-    'learning_rate' : 1e-2,
+    'p' : 4096,             # feature count
+    'lambda' : 0.5,         # to be optimized
+    'learning_rate' : 1e-3,
     'learning_rate_decay' : 0.999
 }
 
@@ -161,10 +161,10 @@ if __name__=="__main__":
 
     #models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, **prototypicalNetworkArgs)
 
-    pNetwork = models.prototypicalNetwork.prototypicalNetwork(sess)
-    pNetwork.train(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
-    tempTrainData = trainData.reshape((50, 10, 4096))
-    pNetwork.inference(sess, tempTrainData, testData)
+    # pNetwork = models.prototypicalNetwork.prototypicalNetwork(sess)
+    # pNetwork.train(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
+    # tempTrainData = trainData.reshape((50, 10, 4096))
+    # pNetwork.inference(sess, tempTrainData, testData)
 
 
     #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
@@ -180,7 +180,8 @@ if __name__=="__main__":
     # label = np.concatenate((pos_label, neg_label))
     # models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)    models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)ath="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)
 
-    W = util.loadBaseClassifier()
+    W = np.load('data/base_fc8.npy').T
+    # W = util.loadBaseClassifier()
     feature_avg = np.load('data/feature_avg.npy')
     print(feature_avg.shape)
     models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, feature_avg, W, **vanerModelArgs)

@@ -16,9 +16,9 @@ class vanerModel(object):
 
         self.loss = tf.add(
                 tf.square(tf.norm(tf.subtract(tf.matmul(self.V, self.T), self.W_),
-                        ord='fro', axis=(0,1))),
+                        ord='fro', axis=(-2,-1))),
                 tf.multiply(kwargs['lambda'], tf.square(tf.norm(tf.subtract(self.A_, 
-                    tf.matmul(self.V, tf.transpose(self.V)) ), ord='fro', axis=(0,1))))
+                    tf.matmul(self.V, tf.transpose(self.V)) ), ord='fro', axis=(-2,-1))))
             )
         # self.loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.label_, logits=self.logits))
         
@@ -57,8 +57,9 @@ class vanerModel(object):
 
 
     def train_epoch(self, sess, A, W, **kwargs):
-        loss_, _ = sess.run([self.loss, self.train_op], feed_dict={self.A_: A, self.W_: W})
-        print("loss = %.3f" % (loss_))
+        for _ in range(10):
+            loss_, __ = sess.run([self.loss, self.train_op], feed_dict={self.A_: A, self.W_: W})
+            print("loss = %.3f" % (loss_))
         # print( tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='encoder'))
 
 
@@ -69,13 +70,11 @@ def cosine_distance(x, y):
 def train(sess, A, W, **kwargs):
     print ("Begin Training")
     model = vanerModel(sess, **kwargs)
-    times = 0
-    train_times = 1000
+    train_times = 100
     for _ in range(train_times):
         model.train_epoch(sess, A, W, **kwargs)
         print("epoch : %d" % ( _ )) 
-
-    model.save_model(sess, **kwargs)
+        model.save_model(sess, **kwargs)
     return model
 
 
@@ -95,10 +94,12 @@ def trainVanerModel(sess, trainData, trainLabel, trainIndex, a, W, **kwargs):
     # Calculate Matrix A:
     # -- TODO: Rewrite this --
 
-    A = np.zeros(shape=[base_n, base_n], dtype=np.float32)
-    for i in range(base_n):
-        for j in range(base_n):
-            A[i][j] = cosine_distance(x[i], x[j])
+    # A = np.zeros(shape=[base_n, base_n], dtype=np.float32)
+    # for i in range(base_n):
+    #     for j in range(base_n):
+    #         A[i][j] = cosine_distance(x[i], x[j])
+    # np.save('data/A.npy', A)
+    A = np.load('data/A.npy')
     
     model = train(sess, A, W, **kwargs)  
     print("Training complete.")
