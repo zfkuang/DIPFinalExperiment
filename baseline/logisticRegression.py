@@ -16,15 +16,20 @@ def logisticReg(trainData, trainLabel, testData, testLabel, **kwargs):
     trainData = util.normalization(trainData)
     testData = util.normalization(testData)
     acc_list = []
+    acc_max = 0
+    ret = []
 
     # Shuffle 10 times, seems useless for logistic regression
-    for i in range(10):
+    for i in range(1):
         trainData_shuffle, trainLabel_shuffle = util.shuffle(trainData, trainLabel)
         clf.fit(trainData_shuffle, trainLabel_shuffle)
         acc_i = clf.score(testData, testLabel)
         print("%d acc: " % i, acc_i)
         acc_list.append(acc_i)
+        if acc_i > acc_max:
+            acc_max = acc_i 
+            ret = clf.predict(testData)
 
     acc = np.mean(np.array(acc_list))
     print("Logistic Regression accuracy: ", acc)
-    return acc
+    return ret, acc_max
