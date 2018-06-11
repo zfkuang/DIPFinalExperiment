@@ -11,6 +11,8 @@ import util
 import layer
 import network
 
+from sklearn.model_selection import train_test_split
+
 import models.binary_classifier
 binaryClassifierArgs = {
     "batch_size":5,
@@ -27,10 +29,10 @@ import models.multi_classifier
 multiClassifierArgs = {
     "batch_size":5,
     "keep_prob":0.5,
-    "learning_rate":0.001,
+    "learning_rate":0.0005,
     "learning_rate_decay":0.999,
     "model":"mlp",
-    "epoch":100,
+    "epoch":1000,
     "lambda_l2": 0.005
 }
 
@@ -154,9 +156,12 @@ if __name__=="__main__":
     #np.save('testlabel_150_fc7.npy', testLabel)
 
     #methods that need feature extraction.
-    #knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
+
+    # trainData = np.load("data/em_train_all.npy")
+    # testData = np.load("data/em_test.npy")
+    # knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
     #bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
-    #baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    # baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
     # decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
     #logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
     #linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
@@ -173,10 +178,10 @@ if __name__=="__main__":
 
     #models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, **prototypicalNetworkArgs)
 
-    pNetwork = models.prototypicalNetwork.prototypicalNetwork(sess)
-    pNetwork.train(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
-    tempTrainData = trainData.reshape((50, 10, 4096))
-    pNetwork.inference(sess, tempTrainData, testData)
+    # pNetwork = models.prototypicalNetwork.prototypicalNetwork(sess)
+    # pNetwork.train(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
+    # tempTrainData = trainData.reshape((50, 10, 4096))
+    # pNetwork.inference(sess, tempTrainData, testData)
 
 
     #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
@@ -192,11 +197,16 @@ if __name__=="__main__":
     # label = np.concatenate((pos_label, neg_label))
     # models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)    models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)ath="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)
 
-    W = util.loadBaseClassifier()
-    feature_avg = np.load('data/feature_avg.npy')
-    print(feature_avg.shape)
-    models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, feature_avg, W, **vanerModelArgs)
+    # W = util.loadBaseClassifier()
+    # feature_avg = np.load('data/feature_avg.npy')
+    # print(feature_avg.shape)
+    # models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, feature_avg, W, **vanerModelArgs)
     #models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
     #models.binary_classifier.test_novel_classifier(sess, testData, testLabel, **binaryClassifierArgs)
 
-    #models.multi_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **multiClassifierArgs)
+
+    trainData = np.load("data/em_basic_all.npy")
+    trainLabel = np.load("data/em_basic_all_label.npy")
+    trainData, trainLabel = util.shuffle(trainData, trainLabel)
+    trainData, testData, trainLabel, testLabel = train_test_split(trainData, trainLabel, test_size=0.1)
+    models.multi_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **multiClassifierArgs)

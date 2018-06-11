@@ -28,5 +28,7 @@ import util
 # net.load_initial_weights(sess)
 
 
-a=np.load("data/base_fc8.npy")
+a=np.load("data/em_basic.npy")
 print(a.shape)
+a = a.reshape(1000,-1)
+np.save("data/em_basic.npy", a)

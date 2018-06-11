@@ -23,12 +23,12 @@ def encoder(x, output_dim, keep_prob, reuse=False):
 class multi_classifier(object):
     def __init__(self, sess, **kwargs):
 
-        self.data_ = tf.placeholder(tf.float32, shape=[None, 4096])
+        self.data_ = tf.placeholder(tf.float32, shape=[None, 1500])
         self.label_ = tf.placeholder(tf.int32, shape=[None])
         self.keep_prob_ = tf.placeholder(tf.float32)
 
         if kwargs['model'] == 'mlp':
-            self.logits = encoder(self.data_, 50, self.keep_prob_)
+            self.logits = encoder(self.data_, 1000, self.keep_prob_)
         else:
             return None
 
