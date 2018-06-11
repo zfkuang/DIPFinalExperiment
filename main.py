@@ -91,7 +91,7 @@ decisionTreeArgs = {
     'missing': 1
 }
 
-#import models.prototypicalNetwork
+import models.prototypicalNetwork
 prototypicalNetworkArgs = {
 }
 
@@ -110,9 +110,10 @@ if __name__=="__main__":
 
     # Initialization
 
-    trainData, trainLabel = util.uploadData(0, sampleNumber=500, dataFolder="training", fileNameRegex=r"(?P<group>\d{3})_(?P<index>\d{4}).jpg", groupInFilename=True)
+    trainData, trainLabel = util.uploadData(1, sampleNumber=500, dataFolder="training", fileNameRegex=r"(?P<group>\d{3})_(?P<index>\d{4}).jpg", groupInFilename=True)
     testData, testLabel = util.uploadData(0, sampleNumber=2500, dataFolder="testing", fileNameRegex=r"testing_(?P<index>\d*).jpg", groupInFilename=False)
 
+    pdb.set_trace()
     sess = tf.Session()
     #inputData = util.normalization(inputData)
     #trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
@@ -158,10 +159,10 @@ if __name__=="__main__":
     # inputData = inputData.reshape(500, 4096)
     # inputLabel = inputLabel.reshape(500)
 
-    # pNetwork = models.prototypicalNetwork.prototypicalNetwork(sess)
-    # pNetwork.train(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
-    # tempTrainData = trainData.reshape((50, 10, 4096))
-    # pNetwork.inference(sess, tempTrainData, testData)
+    #pNetwork = models.prototypicalNetwork.prototypicalNetwork(sess)
+    #pNetwork.train(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
+    #tempTrainData = trainData.reshape((50, 10, 4096))
+    #pNetwork.inference(sess, tempTrainData, testData)
 
 
     #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)

@@ -43,22 +43,22 @@ def imageFileToArray(session, filename):
         img_string = tf.read_file(filename)
         img_decoded = tf.image.decode_jpeg(img_string, channels=3)
         img_resized = tf.image.resize_images(img_decoded, [227, 227])
-        img_centered = tf.subtract(img_resized, VGG_MEAN)
-
-        # RGB -> BGR
-        img_bgr = img_centered[:, :, ::-1]
         return session.run(img_resized)
 
 seq = iaa.SomeOf(3, [
-    iaa.Crop(px=(0, 16)), # crop images from each side by 0 to 16px (randomly chosen)
+    iaa.Crop(px=(0, 10)), # crop images from each side by 0 to 16px (randomly chosen)
     iaa.Fliplr(0.5), # 0.5 is the probability, horizontally flip 50% of the images
-    iaa.Add((-40, 40), per_channel=0.6),
-    iaa.AdditiveGaussianNoise(scale=(0, 0.05*255)),
-    iaa.ContrastNormalization((0.5, 1.5)),
-    iaa.Affine(scale={"x": (0.9, 1.2), "y": (0.9, 1.2)}, rotate=(-45, 45), shear=(-16, 16),  mode=["edge"])
+    iaa.Add((-20, 20), per_channel=0),
+    # iaa.AdditiveGaussianNoise(scale=(0, 0.05*255)),
+    iaa.ContrastNormalization((0.8, 1.2)),
+    iaa.Affine(scale={"x": (0.9, 1.1), "y": (0.9, 1.1)}, rotate=(-5, 5), shear=(-7, 7),  mode=["edge"])
 ])
-def transImage(images):
-    return seq.augment_images(images)
+def transImage(images, withAugmentation):
+    if withAugmentation:
+        images = seq.augment_images(images)
+    images = images-[123.68, 116.779, 103.939]
+    images = images[:, :, :, ::-1]
+    return images
 
 def extractFeature(sess, model, data):
     return sess.run([model.fc7], feed_dict={model.X:data})[0]
@@ -118,11 +118,11 @@ def uploadData(dataAugment, sampleNumber, dataFolder, fileNameRegex, groupInFile
                         model.load_initial_weights(sess)
                         
                         sourceTot = totalCnt
-                        inputData[totalCnt-batchCnt:totalCnt] = extractFeature(sess, model, batchInputData)[:batchCnt]
+                        inputData[totalCnt-batchCnt:totalCnt] = extractFeature(sess, model, transImage(batchInputData, 0))[:batchCnt]
                         #pdb.set_trace()
                         for i in range(dataAugment):
                             ind[totalCnt:totalCnt+batchCnt] = ind[sourceTot-batchCnt:sourceTot]+sampleNumber*(i+1)
-                            inputData[totalCnt:totalCnt+batchCnt] = extractFeature(sess, model, transImage(batchInputData))[:batchCnt]
+                            inputData[totalCnt:totalCnt+batchCnt] = extractFeature(sess, model, transImage(batchInputData, 1))[:batchCnt]
                             totalCnt = totalCnt+batchCnt 
                         sess.close()
                         tf.reset_default_graph()
