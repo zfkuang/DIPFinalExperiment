@@ -108,17 +108,20 @@ vanerModelArgs = {
 
 if __name__=="__main__":
 
-    # InitializationD
-    sess = tf.Session()
-    trainData, trainLabel = util.uploadData(sess, sampleNumber=500, dataFolder="training", fileNameRegex=r"(?P<group>\d{3})_(?P<index>\d{4}).jpg", groupInFilename=True)
-    testData, testLabel = util.uploadData(sess, sampleNumber=2500, dataFolder="testing", fileNameRegex=r"testing_(?P<index>\d*).jpg", groupInFilename=False)
+    # Initialization
 
+    trainData, trainLabel = util.uploadData(0, sampleNumber=500, dataFolder="training", fileNameRegex=r"(?P<group>\d{3})_(?P<index>\d{4}).jpg", groupInFilename=True)
+    testData, testLabel = util.uploadData(0, sampleNumber=2500, dataFolder="testing", fileNameRegex=r"testing_(?P<index>\d*).jpg", groupInFilename=False)
+
+    sess = tf.Session()
     #inputData = util.normalization(inputData)
     #trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
     basicData, basicLabel, basicIndex = util.uploadBasicData()
-    print("trainDataset shape:", trainData.shape, trainLabel.shape)
-    print("TestDataset shape:", testData.shape, testLabel.shape)
-    print("SourceDataset shape:", basicData.shape, basicLabel.shape, basicIndex[10])
+    
+    print("Data Input Completed!")
+    print("    trainDataset shape:", trainData.shape, trainLabel.shape)
+    print("    testDataset shape:", testData.shape, testLabel.shape)
+    print("    sourceDataset shape:", basicData.shape, basicLabel.shape)
 
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
@@ -133,9 +136,6 @@ if __name__=="__main__":
     # trainData = util.extractFeature(sess, model, trainData)
     # testData = util.extractFeature(sess, model, testData)
 
-    print(trainData.shape)
-    print(testData.shape)
-
     #np.save('train_4096_fc7.npy', trainData)
     #np.save('test_4096_fc7.npy', testData)
     #np.save('trainlabel_350_fc7.npy', trainLabel)
@@ -144,8 +144,8 @@ if __name__=="__main__":
     #methods that need feature extraction.
     #knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
     #bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
-    #baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
-    # decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
+    baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    #decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
     #logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
     #linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
 
@@ -158,13 +158,10 @@ if __name__=="__main__":
     # inputData = inputData.reshape(500, 4096)
     # inputLabel = inputLabel.reshape(500)
 
-
-    #models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, **prototypicalNetworkArgs)
-
-    pNetwork = models.prototypicalNetwork.prototypicalNetwork(sess)
-    pNetwork.train(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
-    tempTrainData = trainData.reshape((50, 10, 4096))
-    pNetwork.inference(sess, tempTrainData, testData)
+    # pNetwork = models.prototypicalNetwork.prototypicalNetwork(sess)
+    # pNetwork.train(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
+    # tempTrainData = trainData.reshape((50, 10, 4096))
+    # pNetwork.inference(sess, tempTrainData, testData)
 
 
     #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
@@ -179,10 +176,10 @@ if __name__=="__main__":
     # data = np.concatenate((pos_data, neg_data))
     # label = np.concatenate((pos_label, neg_label))
     # models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)    models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)ath="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)
+    # models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
+    # models.binary_classifier.test_novel_classifier(sess, testData, testLabel, **binaryClassifierArgs)
 
-    W = util.loadBaseClassifier()
-    feature_avg = np.load('data\\feature_avg.npy')
-    print(feature_avg.shape)
-    models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, feature_avg, W, **vanerModelArgs)
-    #models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
-    #models.binary_classifier.test_novel_classifier(sess, testData, testLabel, **binaryClassifierArgs)
+    # W = util.loadBaseClassifier()
+    # feature_avg = np.load('data\\feature_avg.npy')
+    # print(feature_avg.shape)
+    # models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, feature_avg, W, **vanerModelArgs)
