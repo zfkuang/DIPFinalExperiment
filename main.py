@@ -161,7 +161,28 @@ if __name__=="__main__":
     pNetwork = models.prototypicalNetwork.prototypicalNetwork(sess)
     pNetwork.train(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
     tempTrainData = trainData.reshape((50, 10, 4096))
-    pNetwork.inference(sess, tempTrainData, testData)
+    em_train_all, em_train, em_test, dist = pNetwork.inference(sess, tempTrainData, testData)
+    np.save("data/em_train_all.npy", em_train_all)
+    np.save("data/em_train.npy", em_train)
+    np.save("data/em_test.npy", em_test)
+#    with sess.as_default():
+#        np.save("data/em_dist.npy", dist.eval())
+    em_basic = [0] * 1000
+
+    for i, indexlist in enumerate(basicIndex):
+        data = basicData[indexlist]
+        temp = data.reshape(1, -1, 4096)
+        label = basicLabel[indexlist]
+        em_basic_all, temp_em_basic, _, dist = pNetwork.inference(sess, temp, data)
+        em_basic[i] = temp_em_basic
+        np.save("data/em_basic_%d.npy"%i, em_basic_all)
+        print("em_basic_all[%d] shape"%i, em_basic_all.shape)
+        #print("dist %d", dist)
+    np.save("data/em_basic.npy", np.array(em_basic))
+    print("em_train_all shape:", em_train_all.shape)
+    print("em_train shape:", em_train.shape)
+    print("em_test shape:", em_test.shape)
+    print("em_basic shape:", np.array(em_basic).shape)
 
     #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
 

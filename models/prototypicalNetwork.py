@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import layer
 import pdb
 
-n_epochs = 100
+n_epochs = 30
 n_episodes = 100
 n_way = 100
 n_shot = 5
@@ -16,7 +16,7 @@ im_width, im_height, channels = 227, 227, 3
 n_features = 4096
 h_dim = 32
 z_dim = 32
-output_dim = 500
+output_dim = 1500
 n_test_episodes = 100
 n_test_way = 50
 n_test_example = 10
@@ -112,9 +112,9 @@ class prototypicalNetwork(object):
         num_queries = q_shape[0]
         self.y = tf.placeholder(tf.int64, [None]) # num_queries
         y_one_hot = tf.one_hot(self.y, depth=num_classes)
-        emb_x_all = encoder(tf.reshape(self.x, [num_classes * num_support, n_features]), output_dim, self.keep_prob)
-        emb_dim = tf.shape(emb_x_all)[-1]
-        self.emb_x = tf.reduce_mean(tf.reshape(emb_x_all, [num_classes, num_support, emb_dim]), axis=1)
+        self.emb_x_all = encoder(tf.reshape(self.x, [num_classes * num_support, n_features]), output_dim, self.keep_prob)
+        emb_dim = tf.shape(self.emb_x_all)[-1]
+        self.emb_x = tf.reduce_mean(tf.reshape(self.emb_x_all, [num_classes, num_support, emb_dim]), axis=1)
         self.emb_q = encoder(self.q, output_dim, self.keep_prob, reuse=True)
         self.dists = get_distance(self.emb_q, self.emb_x, self.keep_prob)
         self.log_p_y = tf.reshape(tf.nn.log_softmax(-self.dists), [num_queries, -1])
@@ -140,7 +140,7 @@ class prototypicalNetwork(object):
         sess.run(tf.global_variables_initializer())
         #with tf.variable_scope('encoder', reuse=True):
         #    alexNet.load_initial_weights(sess)
-    def train(self, sess, trainData, trainLabel, trainIndex, inputData, inputLabel, testData, testLabel, 
+    def train(self, sess, trainData, trainLabel, trainIndex, inputData, inputLabel, testData, testLabel,
         sourceClassNumber=1000, novelClassNumber=50):
 
         inputData = inputData.reshape([novelClassNumber, inputData.shape[0]//novelClassNumber]+list(inputData.shape[1:]))
@@ -163,8 +163,8 @@ class prototypicalNetwork(object):
                 # labels in training doesn't matter at all
                 labels = np.tile(np.arange(n_way)[:, np.newaxis], (1, n_query)).astype(np.uint8)
                 labels = labels.reshape([n_way*n_query])
-                _, ls, ac, logy = sess.run([self.train_op, self.ce_loss, self.acc, self.log_p_y], 
-                    feed_dict={self.x: support, self.q: query, self.y:labels, self.keep_prob: 0.6})
+                _, ls, ac, logy = sess.run([self.train_op, self.ce_loss, self.acc, self.log_p_y],
+                    feed_dict={self.x: support, self.q: query, self.y:labels, self.keep_prob: 0.5})
                 if (epi+1) % 50 == 0:
                     #print(logy[:5])
                     print('[epoch {}/{}, episode {}/{}] => loss: {:.5f} acc: {:.5f}'.format(ep+1, n_epochs, epi+1, n_episodes, ls, ac))
@@ -215,5 +215,5 @@ class prototypicalNetwork(object):
             print('Average Test Accuracy: {:.5f}, Loss: {:.5f}'.format(np.mean(acc_), np.mean(loss_)))
 
     def inference(self, sess, inputShot, inputQuery):
-        eX, eQ = sess.run([self.emb_x, self.emb_q], {self.x:inputShot, self.q:inputQuery, self.keep_prob: 1.0})
-        return eX, eQ, get_distance(eX, eQ)
+        eX_all, eX, eQ = sess.run([self.emb_x_all, self.emb_x, self.emb_q], {self.x:inputShot, self.q:inputQuery, self.keep_prob: 1.0})
+        return eX_all, eX, eQ, get_distance(eX, eQ)
