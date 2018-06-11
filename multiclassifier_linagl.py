@@ -3,8 +3,8 @@ import scipy
 import os
 
 
-use_num = 1000
-Classfier_size = 8194
+feature_size = 4096
+class_size = 50
 
 f = np.load('data/f.npy')
 print('f.shape', f.shape)
@@ -31,27 +31,25 @@ print('test_data.shape', test_data.shape)
 print('test_label.shape', test_label.shape)
 
 
-W_trained = np.zeros((50,4096))
-W_num = np.zeros((50,))
-
 feature_avg = np.zeros((50, 4096))
 feature_avg_num = np.zeros((50,))
 for i in range(train_label.size):
 	print(i)
-	#train_data[i] = train_data[i] / np.linalg.norm(train_data[i])
+	train_data[i] = train_data[i] / np.linalg.norm(train_data[i])
 	feature_avg[train_label[i]] = feature_avg[train_label[i]] + train_data[i]
 	feature_avg_num[train_label[i]] = feature_avg_num[train_label[i]] + 1
 
 for i in range(50):
 	feature_avg[i] = feature_avg[i] / feature_avg_num[i]
-	#feature_avg[i] = feature_avg[i] / np.linalg.norm(feature_avg[i])
+	feature_avg[i] = feature_avg[i] / np.linalg.norm(feature_avg[i])
 
-np.save('data/feature_avg.npy', feature_avg)
+#np.save('data/feature_avg.npy', feature_avg)
 
 
 
 
 mc_tained_w = np.zeros((50,4096))
+mc_Hao_w = np.zeros((50,4096))
 if os.path.exists('data/mc_Hao_w.npy'):
 	mc_Hao_w = np.load('data/mc_Hao_w.npy')
 	#mc_Hao_w.npy (50 * 4096)
@@ -65,17 +63,18 @@ if not os.path.exists('data/mc_tained_w.npy'):
 	for i in range(50):
 		print(i)
 		mc_tained_w[i] = get_classifier_param_linalg(feature_avg[i])
-		#mc_tained_w[i] = mc_Hao_w[i] # Hao God please use this 
 	np.save('data/mc_tained_w.npy', mc_tained_w)
 
 else:
 	mc_tained_w = np.load('data/mc_tained_w.npy')
 
 
-alf = 1
-beta = 155
+alf = 2
+beta = 25
+cnm = 0
 
-mc_tained_w = mc_tained_w * alf + novel_fc8 * beta
+
+mc_avg_w = mc_tained_w * alf + novel_fc8 * beta + mc_Hao_w * cnm
 
 
 
@@ -83,7 +82,7 @@ def cal_label(feature, label_):
 	max_ans = 0
 	id_ans = -1
 	for i in range(50):
-		y = feature.dot(mc_tained_w[i]) 
+		y = feature.dot(mc_avg_w[i]) 
 		if y > max_ans:
 			max_ans = y
 			id_ans = i
