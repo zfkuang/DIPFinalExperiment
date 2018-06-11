@@ -110,10 +110,9 @@ if __name__=="__main__":
 
     # Initialization
 
-    trainData, trainLabel = util.uploadData(1, sampleNumber=500, dataFolder="training", fileNameRegex=r"(?P<group>\d{3})_(?P<index>\d{4}).jpg", groupInFilename=True)
+    trainData, trainLabel = util.uploadData(3, sampleNumber=500, dataFolder="training", fileNameRegex=r"(?P<group>\d{3})_(?P<index>\d{4}).jpg", groupInFilename=True)
     testData, testLabel = util.uploadData(0, sampleNumber=2500, dataFolder="testing", fileNameRegex=r"testing_(?P<index>\d*).jpg", groupInFilename=False)
 
-    pdb.set_trace()
     sess = tf.Session()
     #inputData = util.normalization(inputData)
     #trainData, trainLabel, testData, testLabel = util.divideData(inputData, inputLabel)
@@ -145,9 +144,9 @@ if __name__=="__main__":
     #methods that need feature extraction.
     #knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
     #bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
-    baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    #baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
     #decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
-    #logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
+    logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
     #linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
 
     # trainData = trainData.reshape(50, 10, 4096)
