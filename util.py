@@ -6,6 +6,35 @@ import sys
 import re
 from sklearn.preprocessing import normalize
 import layer
+from imgaug import augmenters as iaa
+import imgaug as ia
+from PIL import Image
+
+
+# def imageDataAugmentation():
+#     datagen = ImageDataGenerator(
+#             rotation_range=40,
+#             width_shift_range=0.2,
+#             height_shift_range=0.2,
+#             shear_range=0.2,
+#             zoom_range=0.2,
+#             horizontal_flip=True,
+#             vertical_flip=True,
+#             fill_mode='nearest')
+
+#     img = load_img('data/training/005.baseball-glove/005_0001.jpg')  # 这是一个PIL图像
+#     print(img)
+#     x = img_to_array(img)  # 把PIL图像转换成一个numpy数组，形状为(3, 150, 150)
+#     x = x.reshape((1,) + x.shape)  # 这是一个numpy数组，形状为 (1, 3, 150, 150)
+
+#     # 下面是生产图片的代码
+#     # 生产的所有图片保存在 `preview/` 目录下
+#     i = 0
+#     for batch in datagen.flow(x, batch_size=1,
+#                               save_to_dir='preview', save_prefix='cat', save_format='jpeg'):
+#         i += 1
+#         if i > 50:
+#             break  # 否则生成器会退出循环
 
 def imageFileToArray(session, filename):
         # load and preprocess the image
@@ -14,17 +43,29 @@ def imageFileToArray(session, filename):
         img_string = tf.read_file(filename)
         img_decoded = tf.image.decode_jpeg(img_string, channels=3)
         img_resized = tf.image.resize_images(img_decoded, [227, 227])
-        img_centered = tf.subtract(img_resized, VGG_MEAN)
+        return session.run(img_resized)
 
-        # RGB -> BGR
-        img_bgr = img_centered[:, :, ::-1]
-        return session.run(img_bgr)
+seq = iaa.SomeOf(3, [
+    iaa.Crop(px=(0, 10)), # crop images from each side by 0 to 16px (randomly chosen)
+    iaa.Fliplr(0.5), # 0.5 is the probability, horizontally flip 50% of the images
+    iaa.Add((-20, 20), per_channel=0),
+    # iaa.AdditiveGaussianNoise(scale=(0, 0.05*255)),
+    iaa.ContrastNormalization((0.8, 1.2)),
+    iaa.Affine(scale={"x": (0.9, 1.1), "y": (0.9, 1.1)}, rotate=(-5, 5), shear=(-7, 7),  mode=["edge"])
+])
+def transImage(images, withAugmentation):
+    if withAugmentation:
+        images = seq.augment_images(images)
+    images = images-[123.68, 116.779, 103.939]
+    images = images[:, :, :, ::-1]
+    return images
 
 def extractFeature(sess, model, data):
     return sess.run([model.fc7], feed_dict={model.X:data})[0]
 
-def uploadData(sess, sampleNumber, dataFolder, fileNameRegex, groupInFilename):
+def uploadData(dataAugment, sampleNumber, dataFolder, fileNameRegex, groupInFilename):
 
+    sess = tf.Session()
     inputData, inputLabel = None, None
 
     if os.path.exists("data//"+dataFolder) != True:
@@ -35,19 +76,22 @@ def uploadData(sess, sampleNumber, dataFolder, fileNameRegex, groupInFilename):
         inputLabel = np.load("data//testingLabel.npy")
         inputLabel = inputLabel-np.min(inputLabel)
     else:
-        inputLabel = np.zeros((500), dtype=np.uint32)
-        for i in range(50):
-            for j in range(10):
-                inputLabel[i*10+j] = i
+        inputLabel = np.zeros((500*(dataAugment+1)), dtype=np.uint32)
+        for t in range(dataAugment+1):
+            for i in range(50):
+                for j in range(10):
+                    inputLabel[t*500+i*10+j] = i
 
-    npFileName = "data//"+dataFolder+"Data.npy"
+    npFileName = "data//"+dataFolder+"Data"+str(dataAugment)+".npy"
     if os.path.exists(npFileName) != True:
         print("Creating new datafile of dataset: "+dataFolder)
-        inputData = np.zeros((sampleNumber, 4096), dtype=np.float32)
+        generageSampleNumber = sampleNumber*(dataAugment+1)
+        inputData = np.zeros((generageSampleNumber, 4096), dtype=np.float32)
         batchInputData = np.zeros((300, 227, 227, 3), dtype=np.float32)
         batchCnt = 0
         totalCnt = 0
-        ind = np.zeros(sampleNumber, dtype=np.int32)
+        fileCnt = 0
+        ind = np.zeros(generageSampleNumber, dtype=np.int32)
         imageName = fileNameRegex
         for dirPath, dirNames, fileNames in os.walk("data//"+dataFolder):
             #print(dirPath, dirNames, fileNames)
@@ -67,17 +111,29 @@ def uploadData(sess, sampleNumber, dataFolder, fileNameRegex, groupInFilename):
                     batchInputData[batchCnt] = imageFileToArray(sess, dirPath+"//"+fileName)
                     batchCnt = batchCnt+1
                     totalCnt = totalCnt+1
-                    if batchCnt==300 or totalCnt==sampleNumber:
+                    fileCnt = fileCnt+1
+                    if batchCnt==300 or fileCnt==sampleNumber:
                         data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
                         model = layer.AlexNet(data_, 1, 1000, [])
                         model.load_initial_weights(sess)
-                        inputData[totalCnt-batchCnt:totalCnt] = extractFeature(sess, model, batchInputData)[:batchCnt]
+                        
+                        sourceTot = totalCnt
+                        inputData[totalCnt-batchCnt:totalCnt] = extractFeature(sess, model, transImage(batchInputData, 0))[:batchCnt]
+                        #pdb.set_trace()
+                        for i in range(dataAugment):
+                            ind[totalCnt:totalCnt+batchCnt] = ind[sourceTot-batchCnt:sourceTot]+sampleNumber*(i+1)
+                            inputData[totalCnt:totalCnt+batchCnt] = extractFeature(sess, model, transImage(batchInputData, 1))[:batchCnt]
+                            totalCnt = totalCnt+batchCnt 
+                        sess.close()
                         tf.reset_default_graph()
+                        sess = tf.Session()
                         batchCnt = 0
         iind = np.copy(ind)
         for i in range(ind.shape[0]):
             iind[ind[i]] = i
         inputData = inputData[iind]
+
+
         np.save(npFileName, inputData)
     else:
         print("Loading datafile of dataset: "+dataFolder)
@@ -85,6 +141,9 @@ def uploadData(sess, sampleNumber, dataFolder, fileNameRegex, groupInFilename):
         print(inputData.shape)
 
     #pdb.set_trace()
+    sess.close()
+    tf.reset_default_graph()
+
     return inputData, inputLabel
 
 def uploadBasicData():
