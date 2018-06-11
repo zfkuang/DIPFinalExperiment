@@ -52,14 +52,19 @@ class vanerModel(object):
                 V = reader.get_tensor(key)
             if (str_name == 'T'):
                 T = reader.get_tensor(key)
-        network = {"V": V, "T": T}
-        np.save("data/vanerModel.npy", network)
+        np.save("data/vanerModel_V.npy", V)
+        np.save("data/vanerModel_T.npy", T)
 
 
-    def train_epoch(self, sess, A, W, **kwargs):
-        for _ in range(10):
+    def train_epoch(self, sess, A, W, best_loss, **kwargs):
+        epoch_size = 10
+        for _ in range(epoch_size):
             loss_, __ = sess.run([self.loss, self.train_op], feed_dict={self.A_: A, self.W_: W})
             print("loss = %.3f" % (loss_))
+            if (loss_ < best_loss):
+                best_loss = loss_
+                self.save_model(sess, **kwargs)
+        return best_loss
         # print( tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='encoder'))
 
 
@@ -70,12 +75,11 @@ def cosine_distance(x, y):
 def train(sess, A, W, **kwargs):
     print ("Begin Training")
     model = vanerModel(sess, **kwargs)
-    train_times = 500
+    train_times = 5
+    best_loss = 10000000.
     for _ in range(train_times):
-        model.train_epoch(sess, A, W, **kwargs)
+        best_loss = model.train_epoch(sess, A, W, best_loss, **kwargs)
         print("epoch : %d" % ( _ )) 
-        model.save_model(sess, **kwargs)
-    return model
 
 
 def trainVanerModel(sess, trainData, trainLabel, trainIndex, a, W, **kwargs):
@@ -110,9 +114,12 @@ def trainVanerModel(sess, trainData, trainLabel, trainIndex, a, W, **kwargs):
     for i in range(m):
         for j in range(base_n):
             a_new[i][j] = cosine_distance(a[i], x[j])
-        
-    v_new = tf.matmul(a_new, tf.matmul(tf.matrix_inverse(tf.matmul(model.V, tf.transpose(model.V))), model.V))
-    w_new = tf.matmul(v_new, model.T)
+
+    V = tf.constant(np.load("data/vanerModel_V.npy"))
+    T = tf.constant(np.load("data/vanerModel_T.npy"))
+    
+    v_new = tf.matmul(a_new, tf.matmul(tf.matrix_inverse(tf.matmul(V, tf.transpose(V))), V))
+    w_new = tf.matmul(v_new, T)
 
     with sess.as_default():
         np.save('data/W_new.npy', w_new.eval())
