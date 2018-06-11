@@ -71,15 +71,15 @@ for i in range(50):
 np.save('data/feature_avg.npy', feture_avg)
 
 alf = 1
-beta = 0
-W_novel = np.zeros((50,8194))
+beta = 
+W_novel = np.zeros((50,4096))
 
-W_novel_read = np.load('data/novel_classifier(3).npy').item()
+W_novel = np.load('data/novel_fc8.npy').T
 #print(W_full)
 
-for k,v in W_novel_read.items():
-	id = int(k.split('_')[2])
-	W_novel[id] = np.vstack([v.item()['kernel'],v.item()['bias']]).flat
+# for k,v in W_novel_read.items():
+# 	id = int(k.split('_')[2])
+# 	W_novel[id] = np.vstack([v.item()['kernel'],v.item()['bias']]).flat
 
 haoye_trained_classifier = np.load('data/W_new.npy')
 print("haoye_trained_classifier", haoye_trained_classifier.shape)
