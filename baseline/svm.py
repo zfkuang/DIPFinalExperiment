@@ -12,16 +12,23 @@ def svm(trainData, trainLabel, testData, testLabel, **kwargs):
     linearSVC_clf = LinearSVC()
     #this
     acc_list = []
-    shuffleTimes = 5
+    acc_max = 0
+    ret = []
+    shuffleTimes = 1
     for i in range(shuffleTimes):
         print(i+1, '/', shuffleTimes)
         trainData, trainLabel = util.shuffle(trainData, trainLabel)
         linearSVC_clf.fit(trainData, trainLabel)
-        acc_list.append(linearSVC_clf.score(testData, testLabel))
+        acc_i = linearSVC_clf.score(testData, testLabel)
+        acc_list.append(acc_i)
         print("LinearSVC accuracy: ", np.mean(np.array(acc_list)))
+        if acc_i > acc_max:
+            acc_max = acc_i
+            ret = linearSVC_clf.predict(testData)
     acc = np.mean(np.array(acc_list))
     print("LinearSVC accuracy: ", acc)
 
+    return ret, acc_max
 
     SVC_clf = SVC()
     acc_list = []

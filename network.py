@@ -51,13 +51,13 @@ class Network(object):
 
 
     def train(self, sess, data, label, keep_prob):
-        return sess.run([self.loss, self.acc, self.train_op], feed_dict={self.data_:data, self.label_:label, self.keep_prob_:keep_prob})
+        return sess.run([self.loss, self.acc, self.train_op], feed_dict={self.net.fc7:data, self.label_:label, self.keep_prob_:keep_prob})
 
     def test(self, sess, data, label):
-        return sess.run([self.loss, self.acc], feed_dict={self.data_:data, self.label_:label, self.keep_prob_:1.0})
+        return sess.run([self.loss, self.acc], feed_dict={self.net.fc7:data, self.label_:label, self.keep_prob_:1.0})
 
     def inference(self, sess, data):
-        return sess.run([self.pred], feed_dict={self.data_:data, self.keep_prob_:1.0})
+        return sess.run([self.pred], feed_dict={self.net.fc7:data, self.keep_prob_:1.0})
 
 loss_list = []
 acc_list = []

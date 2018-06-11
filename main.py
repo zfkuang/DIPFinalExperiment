@@ -38,9 +38,9 @@ multiClassifierArgs = {
 ## usage: fineTune(sess, trainData, trainLabel, testData, testLabel, **kwargs)
 import baseline.fineTune
 fineTuneArgs = {
-    "batch_size":5,
-    "keep_prob":0.4,
-    "learning_rate":0.005,
+    "batch_size":20,
+    "keep_prob":0.6,
+    "learning_rate":0.001,
     "learning_rate_decay":0.999
 }
 
@@ -138,8 +138,6 @@ if __name__=="__main__":
     # trainData = util.normalization(trainData)
     # testData = util.normalization(testData)
 
-    # methods where feature extraction is not required.
-    # fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
 
     # Feature extraction
     # data_ = tf.placeholder(tf.float32, shape=[None,227,227,3])
@@ -153,12 +151,40 @@ if __name__=="__main__":
     #np.save('trainlabel_350_fc7.npy', trainLabel)
     #np.save('testlabel_150_fc7.npy', testLabel)
 
-    #methods that need feature extraction.
-    #knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
-    #bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
-    #baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    bayesLogit, bayesAcc = baseline.bayes.bayes(trainData, trainLabel, testData, testLabel, **bayesArgs)
+    print(bayesLogit, bayesAcc)
+    svmLogit, svmAcc = baseline.svm.svm(trainData, trainLabel, testData, testLabel, **svmArgs)
+    print(svmLogit, svmAcc)
+    knnLogit, knnAcc = baseline.knn.knn(trainData, trainLabel, testData, testLabel, **knnArgs)
+    print(knnLogit, knnAcc)
+    fineTuneLogit, fineTuneAcc = baseline.fineTune.fineTune(sess, trainData, trainLabel, testData, testLabel, **fineTuneArgs)
+    print(fineTuneLogit, fineTuneAcc)
+    logisticRegLogit, logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
+    print(logisticRegLogit, logisticRegAcc)
+
+    print("\n\nBaseline result: ")
+    print("Bayes: ", bayesAcc)
+    print("SVM: ", svmAcc)
+    print("KNN: ", knnAcc)
+    print("FineTune: ", fineTuneAcc)
+    print("LogisticRegression: ", logisticRegAcc)
+    a = open("data/novalAns.txt").read().split('\n')[:-1]
+    for i in range(len(a)):
+        a[i] = int(a[i])
+    novelLogit = np.array(a)
+    pdb.set_trace()
+    bayesLogit = bayesLogit.reshape((bayesLogit.shape[0], 1))
+    svmLogit = svmLogit.reshape((svmLogit.shape[0], 1))
+    knnLogit = knnLogit.reshape((knnLogit.shape[0], 1))
+    fineTuneLogit = fineTuneLogit.reshape((fineTuneLogit.shape[0], 1))
+    logisticRegLogit = logisticRegLogit.reshape((logisticRegLogit.shape[0], 1))
+    novelLogit = novelLogit.reshape((novelLogit.shape[0], 1))
+    logits = np.concatenate((bayesLogit, knnLogit, novelLogit, svmLogit, fineTuneLogit, logisticRegLogit), axis=1)
+    finalLogit = np.zeros((svmLogit.shape[0]), dtype=np.int32)
+    for i in range(finalLogit.shape[0]):
+        finalLogit[i] = np.argmax(np.bincount(logits[i]))
+    pdb.set_trace()
     #decisionTreeAcc = baseline.decisionTree.decisionTree(trainData, trainLabel, testData, testLabel, **decisionTreeArgs)
-    logisticRegAcc = baseline.logisticRegression.logisticReg(trainData, trainLabel, testData, testLabel)
     #linearRegAcc = baseline.linearRegression.linearReg(trainData, trainLabel, testData, testLabel)
 
     # trainData = trainData.reshape(50, 10, 4096)
@@ -188,10 +214,10 @@ if __name__=="__main__":
     # data = np.concatenate((pos_data, neg_data))
     # label = np.concatenate((pos_label, neg_label))
 
-    W = util.loadBaseClassifier()
-    feature_avg = np.load('data/feature_avg.npy')
-    print(feature_avg.shape)
-    models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, feature_avg, W, **vanerModelArgs)
+    # W = util.loadBaseClassifier()
+    # feature_avg = np.load('data/feature_avg.npy')
+    # print(feature_avg.shape)
+    # models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, feature_avg, W, **vanerModelArgs)
     #models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
     #models.binary_classifier.test_novel_classifier(sess, testData, testLabel, **binaryClassifierArgs)
 

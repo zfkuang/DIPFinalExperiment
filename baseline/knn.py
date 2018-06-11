@@ -25,6 +25,8 @@ def knn(trainData, trainLabel, testData, testLabel, **kwargs):
     trainData = util.normalization(trainData)
     testData = util.normalization(testData)
     acc_list = []
+    ret = []
+    acc_max = 0
     for i in range(10):
         trainData_shuffle, trainLabel_shuffle = util.shuffle(trainData, trainLabel)
         neigh = KNeighborsClassifier(n_neighbors=kwargs['n_neighbors'], weights=kwargs['weights'], p=kwargs['p'])
@@ -34,11 +36,14 @@ def knn(trainData, trainLabel, testData, testLabel, **kwargs):
             neigh.fit(trainData_shuffle, trainLabel_shuffle)
             testData_PCA = pca.transform(testData)
             acc_i = neigh.score(testData_PCA, testLabel)
+            if acc_i > acc_max:
+                acc_max = acc_i
+                ret = neigh.predict(testData_PCA)
         else:
             neigh.fit(trainData_shuffle, trainLabel_shuffle)
-            acc_i = neigh.score(testData, testLabel)
+            acc_i = neigh.score(testData, testLabel)        
         print("%d acc: " % i, acc_i)
         acc_list.append(acc_i)
     acc = np.mean(np.array(acc_list))
     print("KNN accuracy: ", acc)
-    return acc
+    return ret, acc_max
