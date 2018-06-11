@@ -6,7 +6,7 @@ import os
 use_num = 1000
 Classfier_size = 8194
 
-f = np.load('data\\f.npy')
+f = np.load('data/f.npy')
 print(f.shape)
 f = f[0:use_num]
 print(f.shape)
@@ -30,7 +30,7 @@ for i in range(use_num):
 print(W)
 '''
 
-W_full = np.load('data\\base_classifier.npy').item()
+W_full = np.load('data/base_classifier.npy').item()
 #print(W_full)
 
 for k,v in W_full.items():
@@ -39,11 +39,14 @@ for k,v in W_full.items():
 	#print('id=', id)
 	#print('v=',v.item()['kernel'])
 
+#print ([i for i in range(50) for j in range(10)])
 
-train_data = np.load('train_4096_fc7.npy')
-test_data = np.load('test_4096_fc7.npy')
-train_label = np.load('trainlabel_350_fc7.npy')
-test_label = np.load('testlabel_150_fc7.npy')
+train_data = np.load('data/trainingData.npy')
+print(train_data.shape)
+test_data = np.load('data/testingData.npy')
+print(test_data.shape)
+train_label = np.array([i for i in range(50) for j in range(10)])
+test_label = np.load('data/testingLabel.npy')
 print('trls',train_label.shape)
 print('tels',test_label.shape)
 
@@ -65,13 +68,13 @@ for i in range(50):
 	feture_avg[i] = feture_avg[i] / feture_avg_num[i]
 	feture_avg[i] = feture_avg[i] / np.linalg.norm(feture_avg[i])
 
-np.save('data\\feature_avg.npy', feture_avg)
+np.save('data/feature_avg.npy', feture_avg)
 
 alf = 1
 beta = 0
 W_novel = np.zeros((50,8194))
 
-W_novel_read = np.load('data\\novel_classifier(3).npy').item()
+W_novel_read = np.load('data/novel_classifier(3).npy').item()
 #print(W_full)
 
 for k,v in W_novel_read.items():
@@ -93,7 +96,7 @@ def get_classifier_param_linalg(fet):
 W_trained_w = np.zeros((50,4096,2))
 W_trained_b = np.zeros((50,2))
 
-if not os.path.exists('data\\W_trained_w.npy'):
+if not os.path.exists('data/W_trained_w.npy'):
 
 	for i in range(50):
 		print(i)
@@ -106,12 +109,12 @@ if not os.path.exists('data\\W_trained_w.npy'):
 		W_trained_b[i] = W_trained[i].reshape(4097,2)[4096]
 		#print(W_trained_b[i])
 
-	np.save('data\\W_trained_w.npy', W_trained_w)
-	np.save('data\\W_trained_b.npy', W_trained_b)
+	np.save('data/W_trained_w.npy', W_trained_w)
+	np.save('data/W_trained_b.npy', W_trained_b)
 
 else:
-	W_trained_w = np.load('data\\W_trained_w.npy')
-	W_trained_b = np.load('data\\W_trained_b.npy')
+	W_trained_w = np.load('data/W_trained_w.npy')
+	W_trained_b = np.load('data/W_trained_b.npy')
 
 
 W_novel_w = np.zeros((50,4096,2))
