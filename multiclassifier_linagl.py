@@ -75,7 +75,7 @@ else:
 
 
 alf = 1
-beta = 0.3
+beta = 2.1
 
 mc_tained_w = mc_tained_w * alf + novel_fc8 * beta
 
