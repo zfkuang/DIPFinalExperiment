@@ -100,7 +100,7 @@ vanerModelArgs = {
     'n' : 1000,             # base classes count
     'q' : 1200,              # to be optimized
     'p' : 4096,             # feature count
-    'lambda' : 0.3,         # to be optimized
+    'lambda' : 2.0,         # to be optimized
     'learning_rate' : 1e-2,
     'learning_rate_decay' : 0.999
 }
