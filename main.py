@@ -22,6 +22,18 @@ binaryClassifierArgs = {
     "lambda_l2": 0.005
 }
 
+
+import models.multi_classifier
+multiClassifierArgs = {
+    "batch_size":5,
+    "keep_prob":0.5,
+    "learning_rate":0.001,
+    "learning_rate_decay":0.999,
+    "model":"mlp",
+    "epoch":100,
+    "lambda_l2": 0.005
+}
+
 ### Algorithm: fine-tune pre-trained model
 ## usage: fineTune(sess, trainData, trainLabel, testData, testLabel, **kwargs)
 import baseline.fineTune
@@ -175,11 +187,12 @@ if __name__=="__main__":
     # neg_label = [0] * len(basicIndex[1])
     # data = np.concatenate((pos_data, neg_data))
     # label = np.concatenate((pos_label, neg_label))
-    # models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)    models.binary_classifier.test_base_classifier(sess, data, label, weight_path="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)ath="data/save_model/base_class_0/save.npy", **binaryClassifierArgs)
-    # models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
-    # models.binary_classifier.test_novel_classifier(sess, testData, testLabel, **binaryClassifierArgs)
 
-    # W = util.loadBaseClassifier()
-    # feature_avg = np.load('data\\feature_avg.npy')
-    # print(feature_avg.shape)
-    # models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, feature_avg, W, **vanerModelArgs)
+    W = util.loadBaseClassifier()
+    feature_avg = np.load('data/feature_avg.npy')
+    print(feature_avg.shape)
+    models.vanerModel.trainVanerModel(sess, basicData, basicLabel, basicIndex, feature_avg, W, **vanerModelArgs)
+    #models.binary_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **binaryClassifierArgs)
+    #models.binary_classifier.test_novel_classifier(sess, testData, testLabel, **binaryClassifierArgs)
+
+    #models.multi_classifier.train_novel_classifier(sess, trainData, trainLabel, testData, testLabel, **multiClassifierArgs)
