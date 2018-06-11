@@ -111,8 +111,8 @@ import models.vanerModel
 vanerModelArgs = {
     'n' : 1000,             # base classes count
     'q' : 600,              # to be optimized
-    'p' : 8194,             # feature count
-    'lambda' : 0.2,         # to be optimized
+    'p' : 4096,             # feature count
+    'lambda' : 1.0,         # to be optimized
     'learning_rate' : 1e-2,
     'learning_rate_decay' : 0.999
 }
@@ -196,10 +196,12 @@ if __name__=="__main__":
     # inputData = inputData.reshape(500, 4096)
     # inputLabel = inputLabel.reshape(500)
 
-    #pNetwork = models.prototypicalNetwork.prototypicalNetwork(sess)
-    #pNetwork.train(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
-    #tempTrainData = trainData.reshape((50, 10, 4096))
-    #pNetwork.inference(sess, tempTrainData, testData)
+    #models.prototypicalNetwork.prototypicalNetwork(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, **prototypicalNetworkArgs)
+
+    # pNetwork = models.prototypicalNetwork.prototypicalNetwork(sess)
+    # pNetwork.train(sess, basicData, basicLabel, basicIndex, trainData, trainLabel, testData, testLabel, **prototypicalNetworkArgs)
+    # tempTrainData = trainData.reshape((50, 10, 4096))
+    # pNetwork.inference(sess, tempTrainData, testData)
 
 
     #models.binary_classifier.train_base_classifier(sess, basicData, basicLabel, basicIndex, **binaryClassifierArgs)
@@ -214,6 +216,7 @@ if __name__=="__main__":
     # data = np.concatenate((pos_data, neg_data))
     # label = np.concatenate((pos_label, neg_label))
 
+    # W = np.load('data/base_fc8.npy').T
     # W = util.loadBaseClassifier()
     # feature_avg = np.load('data/feature_avg.npy')
     # print(feature_avg.shape)

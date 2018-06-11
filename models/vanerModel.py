@@ -16,9 +16,9 @@ class vanerModel(object):
 
         self.loss = tf.add(
                 tf.square(tf.norm(tf.subtract(tf.matmul(self.V, self.T), self.W_),
-                        ord='fro', axis=(0,1))),
+                        ord='fro', axis=(-2,-1))),
                 tf.multiply(kwargs['lambda'], tf.square(tf.norm(tf.subtract(self.A_, 
-                    tf.matmul(self.V, tf.transpose(self.V)) ), ord='fro', axis=(0,1))))
+                    tf.matmul(self.V, tf.transpose(self.V)) ), ord='fro', axis=(-2,-1))))
             )
         # self.loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.label_, logits=self.logits))
         
@@ -52,13 +52,19 @@ class vanerModel(object):
                 V = reader.get_tensor(key)
             if (str_name == 'T'):
                 T = reader.get_tensor(key)
-        network = {"V": V, "T": T}
-        np.save("data/vanerModel.npy", network)
+        np.save("data/vanerModel_V.npy", V)
+        np.save("data/vanerModel_T.npy", T)
 
 
-    def train_epoch(self, sess, A, W, **kwargs):
-        loss_, _ = sess.run([self.loss, self.train_op], feed_dict={self.A_: A, self.W_: W})
-        print("loss = %.3f" % (loss_))
+    def train_epoch(self, sess, A, W, best_loss, **kwargs):
+        epoch_size = 10
+        for _ in range(epoch_size):
+            loss_, __ = sess.run([self.loss, self.train_op], feed_dict={self.A_: A, self.W_: W})
+            print("loss = %.3f" % (loss_))
+            if (loss_ < best_loss):
+                best_loss = loss_
+                self.save_model(sess, **kwargs)
+        return best_loss
         # print( tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='encoder'))
 
 
@@ -69,14 +75,11 @@ def cosine_distance(x, y):
 def train(sess, A, W, **kwargs):
     print ("Begin Training")
     model = vanerModel(sess, **kwargs)
-    times = 0
-    train_times = 1000
+    train_times = 5
+    best_loss = 10000000.
     for _ in range(train_times):
-        model.train_epoch(sess, A, W, **kwargs)
+        best_loss = model.train_epoch(sess, A, W, best_loss, **kwargs)
         print("epoch : %d" % ( _ )) 
-
-    model.save_model(sess, **kwargs)
-    return model
 
 
 def trainVanerModel(sess, trainData, trainLabel, trainIndex, a, W, **kwargs):
@@ -95,10 +98,12 @@ def trainVanerModel(sess, trainData, trainLabel, trainIndex, a, W, **kwargs):
     # Calculate Matrix A:
     # -- TODO: Rewrite this --
 
-    A = np.zeros(shape=[base_n, base_n], dtype=np.float32)
-    for i in range(base_n):
-        for j in range(base_n):
-            A[i][j] = cosine_distance(x[i], x[j])
+    # A = np.zeros(shape=[base_n, base_n], dtype=np.float32)
+    # for i in range(base_n):
+    #     for j in range(base_n):
+    #         A[i][j] = cosine_distance(x[i], x[j])
+    # np.save('data/A.npy', A)
+    A = np.load('data/A.npy')
     
     model = train(sess, A, W, **kwargs)  
     print("Training complete.")
@@ -109,9 +114,12 @@ def trainVanerModel(sess, trainData, trainLabel, trainIndex, a, W, **kwargs):
     for i in range(m):
         for j in range(base_n):
             a_new[i][j] = cosine_distance(a[i], x[j])
-        
-    v_new = tf.matmul(a_new, tf.matmul(tf.matrix_inverse(tf.matmul(model.V, tf.transpose(model.V))), model.V))
-    w_new = tf.matmul(v_new, model.T)
+
+    V = tf.constant(np.load("data/vanerModel_V.npy"))
+    T = tf.constant(np.load("data/vanerModel_T.npy"))
+    
+    v_new = tf.matmul(a_new, tf.matmul(tf.matrix_inverse(tf.matmul(V, tf.transpose(V))), V))
+    w_new = tf.matmul(v_new, T)
 
     with sess.as_default():
         np.save('data/W_new.npy', w_new.eval())

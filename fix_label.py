@@ -2,15 +2,15 @@ import numpy as np
 
 #pic_num = 63996
 
-lab = np.load('data\\label.npy')
+lab = np.load('data/label.npy')
 print((lab == 0).any())
 print((lab == 1000).any())
 
 print(lab.shape)
-fc7 = np.load('data\\fc7.npy')
+fc7 = np.load('data/fc7.npy')
 print(fc7.shape)
 
-f = open('data\\correct.txt', 'r')
+f = open('data/correct.txt', 'r')
 ct = [0]
 for i in range(1000):
 	ct.append(int(f.readline().split()[1]))
@@ -35,7 +35,7 @@ for i in range(1000):
 	print(np.linalg.norm(f[i]))
 
 
-np.save('data\\f.npy', f)
+np.save('data/f.npy', f)
 
 
 
