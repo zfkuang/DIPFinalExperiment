@@ -61,9 +61,14 @@ for i in range(train_label.size):
 	#W_trained[train_label[i]] = W_trained[train_label[i]] + ax[0].dot(W)
 	#W_num[train_label[i]] = W_num[train_label[i]] + 1 
 
+for i in range(50):
+	feture_avg[i] = feture_avg[i] / feture_avg_num[i]
+	feture_avg[i] = feture_avg[i] / np.linalg.norm(feture_avg[i])
+
+np.save('data\\feature_avg.npy', feture_avg)
 
 alf = 1
-beta = 19
+beta = 0
 W_novel = np.zeros((50,8194))
 
 W_novel_read = np.load('data\\novel_classifier(3).npy').item()
@@ -73,6 +78,18 @@ for k,v in W_novel_read.items():
 	id = int(k.split('_')[2])
 	W_novel[id] = np.vstack([v.item()['kernel'],v.item()['bias']]).flat
 
+haoye_trained_classifier = np.load('data/W_new.npy')
+print("haoye_trained_classifier", haoye_trained_classifier.shape)
+
+
+
+def get_classifier_param_haoye(id):
+	return np.hstack([haoye_trained_classifier[id][0:4096],haoye_trained_classifier[id][4097:8193], haoye_trained_classifier[id][4096], haoye_trained_classifier[id][8193]])
+
+def get_classifier_param_linalg(fet):
+	ax = np.linalg.lstsq(np.transpose(f), np.transpose(feture_avg[i]))
+	return ax[0].dot(W) 
+
 W_trained_w = np.zeros((50,4096,2))
 W_trained_b = np.zeros((50,2))
 
@@ -80,10 +97,9 @@ if not os.path.exists('data\\W_trained_w.npy'):
 
 	for i in range(50):
 		print(i)
-		feture_avg[i] = feture_avg[i] / feture_avg_num[i]
-		feture_avg[i] = feture_avg[i] / np.linalg.norm(feture_avg[i])
-		ax = np.linalg.lstsq(np.transpose(f), np.transpose(feture_avg[i]))
-		W_trained[i] = ax[0].dot(W) 
+		#ax = np.linalg.lstsq(np.transpose(f), np.transpose(feture_avg[i]))
+		#W_trained[i] = get_classifier_param_linalg(feture_avg[i]) 
+		W_trained[i] = get_classifier_param_haoye(i) 
 		#W_trained[i] = W_trained[i] / W_num[i]
 		W_trained_w[i] = W_trained[i].reshape(4097,2)[0:4096]
 		#print(W_trained_w[i].shape)
