@@ -70,7 +70,7 @@ def cosine_distance(x, y):
 def train(sess, A, W, **kwargs):
     print ("Begin Training")
     model = vanerModel(sess, **kwargs)
-    train_times = 1000
+    train_times = 500
     for _ in range(train_times):
         model.train_epoch(sess, A, W, **kwargs)
         print("epoch : %d" % ( _ )) 

@@ -75,7 +75,7 @@ else:
 
 
 alf = 1
-beta = 0
+beta = 0.3
 
 mc_tained_w = mc_tained_w * alf + novel_fc8 * beta
 
@@ -90,8 +90,9 @@ def cal_label(feature, label_):
 			max_ans = y
 			id_ans = i
 	if id_ans != label_:
-		print('error')
-		print(max_ans)
+		# print('error')
+		# print(max_ans)
+		pass
 	return id_ans
 
 
